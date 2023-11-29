@@ -1,0 +1,4 @@
+*.pptx
+*/.vscode
+*/.~*
+*/__pycache__

@@ -7,8 +7,8 @@ Original file is located at
     https://colab.research.google.com/drive/1NoLVEBqkvrHwoYoEuxX0BeJvaJ5MtVrA
 """
 
-!pip install BitVector
-
+# Install BitVector package
+# !pip install BitVector
 
 """Tables"""
 
@@ -52,28 +52,37 @@ InvSbox = (
 )
 
 Mixer = [
-    [BitVector(hexstring="02"), BitVector(hexstring="03"), BitVector(hexstring="01"), BitVector(hexstring="01")],
-    [BitVector(hexstring="01"), BitVector(hexstring="02"), BitVector(hexstring="03"), BitVector(hexstring="01")],
-    [BitVector(hexstring="01"), BitVector(hexstring="01"), BitVector(hexstring="02"), BitVector(hexstring="03")],
-    [BitVector(hexstring="03"), BitVector(hexstring="01"), BitVector(hexstring="01"), BitVector(hexstring="02")]
+    [BitVector(hexstring="02"), BitVector(hexstring="03"),
+     BitVector(hexstring="01"), BitVector(hexstring="01")],
+    [BitVector(hexstring="01"), BitVector(hexstring="02"),
+     BitVector(hexstring="03"), BitVector(hexstring="01")],
+    [BitVector(hexstring="01"), BitVector(hexstring="01"),
+     BitVector(hexstring="02"), BitVector(hexstring="03")],
+    [BitVector(hexstring="03"), BitVector(hexstring="01"),
+     BitVector(hexstring="01"), BitVector(hexstring="02")]
 ]
 
 InvMixer = [
-    [BitVector(hexstring="0E"), BitVector(hexstring="0B"), BitVector(hexstring="0D"), BitVector(hexstring="09")],
-    [BitVector(hexstring="09"), BitVector(hexstring="0E"), BitVector(hexstring="0B"), BitVector(hexstring="0D")],
-    [BitVector(hexstring="0D"), BitVector(hexstring="09"), BitVector(hexstring="0E"), BitVector(hexstring="0B")],
-    [BitVector(hexstring="0B"), BitVector(hexstring="0D"), BitVector(hexstring="09"), BitVector(hexstring="0E")]
+    [BitVector(hexstring="0E"), BitVector(hexstring="0B"),
+     BitVector(hexstring="0D"), BitVector(hexstring="09")],
+    [BitVector(hexstring="09"), BitVector(hexstring="0E"),
+     BitVector(hexstring="0B"), BitVector(hexstring="0D")],
+    [BitVector(hexstring="0D"), BitVector(hexstring="09"),
+     BitVector(hexstring="0E"), BitVector(hexstring="0B")],
+    [BitVector(hexstring="0B"), BitVector(hexstring="0D"),
+     BitVector(hexstring="09"), BitVector(hexstring="0E")]
 ]
 
-b = BitVector(hexstring="4E")
-int_val = b.intValue()
-s = Sbox[int_val]
-s = BitVector(intVal=s, size=8)
-print(s.get_bitvector_in_hex())
+# b = BitVector(hexstring="20")
+# int_val = b.intValue()
+# s = Sbox[int_val]
+# print(s)
+# s = BitVector(intVal=s, size=8)
+# print(s.get_bitvector_in_hex().upper())
 
-AES_modulus = BitVector(bitstring='100011011')
+# AES_modulus = BitVector(bitstring='100011011')
 
-bv1 = BitVector(hexstring="02")
-bv2 = BitVector(hexstring="63")
-bv3 = bv1.gf_multiply_modular(bv2, AES_modulus, 8)
-print(bv3)
+# bv1 = BitVector(hexstring="02")
+# bv2 = BitVector(hexstring="63")
+# bv3 = bv1.gf_multiply_modular(bv2, AES_modulus, 8)
+# print(bv3)
