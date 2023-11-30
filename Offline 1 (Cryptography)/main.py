@@ -1,4 +1,3 @@
-from pydoc import plain
 import numpy as np
 from BitVector import BitVector
 from helper import *
@@ -53,7 +52,9 @@ def expand_key(round):
 
 
 def schedule_key(key):
-    assert len(key) >= AES_key_size // 8
+    len_wanted = AES_key_size // 8
+    while len(key) < len_wanted:
+        key += key
     key = key[:AES_key_size // 8]
     global round_keys  # array of key matrices
     global key_expanded
@@ -180,8 +181,10 @@ def encrypt(message):
     # split the message into 16 byte blocks
     blocks = [message[i:i + 16] for i in range(0, len(message), 16)]
     ciphertext = ""
+    vector = "0" * 16
     for block in blocks:
-        ciphertext += AES_encryption(block)
+        vector = AES_encryption(xor_strings(block, vector))
+        ciphertext += vector
     return ciphertext
 
 
@@ -190,9 +193,11 @@ def decrypt(cipher):
         schedule_key(key)
     blocks = [cipher[i:i + 16] for i in range(0, len(cipher), 16)]
     plaintext = ""
-
+    vector = "0" * 16
     for block in blocks:
-        plaintext += AES_decryption(block)
+        result = xor_strings(AES_decryption(block), vector)
+        vector = block
+        plaintext += result
 
     # print("After Decryption Before Unpadding:")
     # print_hex_string(plaintext)

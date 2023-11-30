@@ -73,6 +73,14 @@ def measure_execution_time(func, task_name, *args, **kwargs):
     return result, (end - start) * 1000
 
 
+def xor_strings(str1, str2):
+    assert len(str1) == len(str2)
+    result = ""
+    for i in range(len(str1)):
+        result += chr(ord(str1[i]) ^ ord(str2[i]))
+    return result
+
+
 def substitute_bytes(arr, src):
     # arr can be 1D or 2D
     flat_array = arr.flatten()
