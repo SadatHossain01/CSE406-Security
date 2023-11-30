@@ -79,3 +79,24 @@ def substitute_bytes(arr, src):
     substituted = np.array([src[val] for val in flat_array])
     substituted = substituted.reshape(arr.shape)
     return substituted
+
+
+def pad_string(str):
+    if len(str) % 16 == 0:
+        # pad with an entire dummy block of 0s (16 bytes)
+        str += "\x00" * 16
+    else:
+        rem = 16 - len(str) % 16
+        str += chr(rem) * rem
+    return str
+
+
+def unpad_string(str):
+    # remove the padding
+    assert len(str) % 16 == 0
+    if str[-1] == 0x00:
+        # remove the entire dummy block
+        return str[:-16]
+    else:
+        # remove the padding
+        return str[:-ord(str[-1])]

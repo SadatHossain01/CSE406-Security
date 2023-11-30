@@ -1,3 +1,4 @@
+from pydoc import plain
 import numpy as np
 from BitVector import BitVector
 from helper import *
@@ -172,8 +173,9 @@ def encrypt(message):
     if not key_expanded:
         schedule_key(key)
 
-    while len(message) % 16 != 0:
-        message += "\0"
+    message = pad_string(message)
+    # print("Before Encryption After Padding:")
+    # print_hex_string(message)
 
     # split the message into 16 byte blocks
     blocks = [message[i:i + 16] for i in range(0, len(message), 16)]
@@ -191,11 +193,16 @@ def decrypt(cipher):
 
     for block in blocks:
         plaintext += AES_decryption(block)
+
+    # print("After Decryption Before Unpadding:")
+    # print_hex_string(plaintext)
+    plaintext = unpad_string(plaintext)
+
     return plaintext
 
 
 key = "BUET CSE19 Batch 2023 Fall Semester"
-message = "Never gonna give you up, never gonna let you down, never gonna run around and desert you, never gonna make you cry, never gonna say goodbye, never gonna tell a lie and hurt you"
+message = "Never Gonna Give You Up Never Gonna Let You Down, Never Gonna Run Around And Desert You, Never Gonna Make You Cry Never Gonna Say Goodbye, Never Gonna Tell A Lie And Hurt You"
 
 schedule_key(key)
 
