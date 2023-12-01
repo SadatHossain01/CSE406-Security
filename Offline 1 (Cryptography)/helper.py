@@ -39,9 +39,9 @@ def print_text_details(title, str, ascii_first):
         print("In HEX: ", end="")
         print_hex_string(str)
     else:
-        print("In HEX:", str)
-        print("In ASCII: ", end="")
+        print("In HEX: ", end="")
         print_hex_string(str)
+        print("In ASCII:", str)
     print()
 
 
@@ -89,22 +89,34 @@ def substitute_bytes(arr, src):
     return substituted
 
 
-def pad_string(str):
-    if len(str) % 16 == 0:
-        # pad with an entire dummy block of 0s (16 bytes)
-        str += "\x00" * 16
+def pad_string(str, space_pad=False):
+    if space_pad:
+        return str + (" " * (16 - len(str) % 16)) if len(str) % 16 != 0 else str
     else:
-        rem = 16 - len(str) % 16
-        str += chr(rem) * rem
-    return str
+        if len(str) % 16 == 0:
+            # pad with an entire dummy block of 0s (16 bytes)
+            str += "\x00" * 16
+        else:
+            rem = 16 - len(str) % 16
+            str += chr(rem) * rem
+        return str
 
 
-def unpad_string(str):
+def unpad_string(str, space_pad=False):
     # remove the padding
     assert len(str) % 16 == 0
-    if str[-1] == 0x00:
-        # remove the entire dummy block
-        return str[:-16]
+    if space_pad:
+        return str
     else:
-        # remove the padding
-        return str[:-ord(str[-1])]
+        if str[-1] == 0x00:
+            # remove the entire dummy block
+            return str[:-16]
+        else:
+            # remove the padding
+            return str[:-ord(str[-1])]
+
+
+def fix_key(key, expected_size):
+    while len(key) < expected_size:
+        key += key
+    return key[:expected_size]
