@@ -6,15 +6,17 @@ from bitvector_demo import Sbox, InvSbox, Mixer, InvMixer
 AES_modulus = BitVector(bitstring='100011011')
 AES_key_size = 256  # can be 128, 192, or 256 bits
 n_rounds = 0
+# initialization_vector = "\x00" * 16
 
 key_expanded = False
 
-# the following will hold the first constant, since the later three are 0 always
+# the following will hold the first constant, since the last three are 0 always
 round_constants = np.zeros(15, dtype=np.uint8)
 round_keys = np.zeros((64, 4), dtype=np.uint8)
 
 
 def schedule_key(key):
+    key = fix_key(key, AES_key_size // 8)
     assert len(key) == AES_key_size // 8
     global n_rounds
     n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
@@ -161,30 +163,34 @@ def AES_decryption(ciphertext):
     return plaintext
 
 
-def encrypt(message):
+def encrypt(message, key, init_vector, key_size):
+    global AES_key_size
+    AES_key_size = key_size
     if not key_expanded:
         schedule_key(key)
 
-    message = pad_string(message, True)
+    message = pad_string(message, False)
     # print("Before Encryption After Padding:")
     # print_hex_string(message)
 
     # split the message into 16 byte blocks
     blocks = [message[i:i + 16] for i in range(0, len(message), 16)]
     ciphertext = ""
-    vector = "\x00" * 16
+    vector = init_vector
     for block in blocks:
         vector = AES_encryption(xor_strings(block, vector))
         ciphertext += vector
     return ciphertext
 
 
-def decrypt(cipher):
+def decrypt(cipher, key, init_vector, key_size):
+    global AES_key_size
+    AES_key_size = key_size
     if not key_expanded:
         schedule_key(key)
     blocks = [cipher[i:i + 16] for i in range(0, len(cipher), 16)]
     plaintext = ""
-    vector = "\x00" * 16
+    vector = init_vector
     for block in blocks:
         result = xor_strings(AES_decryption(block), vector)
         vector = block
@@ -192,35 +198,37 @@ def decrypt(cipher):
 
     # print("After Decryption Before Unpadding:")
     # print_hex_string(plaintext)
-    plaintext = unpad_string(plaintext, True)
+    plaintext = unpad_string(plaintext, False)
 
     return plaintext
 
 
-AES_key_size = int(input("Enter AES Key Size (128, 192, 256): "))
-key = "BUET CSE19 Batch 2023 Fall Semester"
-message = "Never Gonna Give You Up"
-# key = "Thats my Kung Fu"
-# message = "Two One Nine Two"
+if __name__ == "__main__":
+    AES_key_size = int(input("Enter AES Key Size (128, 192, 256): "))
+    # key = "BUET CSE19 Batch 2023 Fall Semester"
+    # message = "Never Gonna Give You Up"
+    # key = "Thats my Kung Fu"
+    # message = "Two One Nine Two"
 
-# key = input("Enter Key: ")
-# message = input("Enter Message: ")
+    key = input("Enter Key: ")
+    message = input("Enter Message: ")
 
-key = fix_key(key, AES_key_size // 8)
-print("AES-" + str(AES_key_size) + " Encryption")
-print_text_details("Key", key, True)
-print_text_details("Plain Text", message, True)
+    key = fix_key(key, AES_key_size // 8)
+    print("AES-" + str(AES_key_size) + " Encryption")
+    print_text_details("Key", key, True)
+    print_text_details("Plain Text", message, True)
 
+    any, schedule_time = measure_execution_time(
+        schedule_key, "Key Schedule", key)
+    cipher, cipher_time = measure_execution_time(
+        encrypt, "Encryption", message)
+    deciphered, decipher_time = measure_execution_time(
+        decrypt, "Decryption", cipher)
 
-any, schedule_time = measure_execution_time(schedule_key, "Key Schedule", key)
-cipher, cipher_time = measure_execution_time(encrypt, "Encryption", message)
-deciphered, decipher_time = measure_execution_time(
-    decrypt, "Decryption", cipher)
+    print_text_details("Ciphered Text", cipher, False)
+    print_text_details("Deciphered Text", deciphered, False)
 
-print_text_details("Ciphered Text", cipher, False)
-print_text_details("Deciphered Text", deciphered, False)
-
-print("Execution Time Details:")
-print("Key Schedule Time:", schedule_time, "ms")
-print("Encryption Time:", cipher_time, "ms")
-print("Decryption Time:", decipher_time, "ms")
+    print("Execution Time Details:")
+    print("Key Schedule Time:", schedule_time, "ms")
+    print("Encryption Time:", cipher_time, "ms")
+    print("Decryption Time:", decipher_time, "ms")

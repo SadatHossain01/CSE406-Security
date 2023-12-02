@@ -1,4 +1,7 @@
 import numpy as np
+import random
+import time
+from sympy import nextprime
 
 
 def print_hex_string(str):
@@ -66,7 +69,6 @@ def matrix_to_string(mat):
 
 
 def measure_execution_time(func, task_name, *args, **kwargs):
-    import time
     start = time.time()
     result = func(*args, **kwargs)
     end = time.time()
@@ -120,3 +122,13 @@ def fix_key(key, expected_size):
     while len(key) < expected_size:
         key += key
     return key[:expected_size]
+
+
+def generate_prime(size_bits):
+    # Generate a random number of the specified size
+    num = random.getrandbits(size_bits)
+
+    # Find the next prime number greater than or equal to the generated number
+    prime = nextprime(num)
+
+    return prime
