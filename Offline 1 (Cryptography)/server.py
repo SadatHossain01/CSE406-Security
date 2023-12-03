@@ -1,4 +1,5 @@
 import socket
+import socketserver
 import ecc
 import socket_helper
 import crypto_helper
@@ -7,7 +8,9 @@ import crypto_helper
 server_ip = 'localhost'
 server_port = 12345
 
+socketserver.TCPServer.allow_reuse_address = True
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_address = ('localhost', 12345)
 server_socket.bind(server_address)
 
@@ -49,16 +52,27 @@ client_socket.send("ready".encode())
 # Hear ready from Bob
 reply = client_socket.recv(1024).decode()
 if reply == "ready":
-    print("Bob is ready to for communication.")
+    print("Bob is ready for communication.")
 else:
-    print("Bob is not ready to for communication.")
+    print("Bob is not ready for communication.")
     exit(0)
-    
+
 while True:
-    choice = int(input("What do you want to send to Bob? (1. Text, 2. File): "))
-    
+    try:
+        choice = int(
+            input("What do you want to send to Bob? (1. Text, 2. File, 3. Exit): "))
+    except:
+        print("Invalid choice.")
+        continue
+
     if choice == 1:
         message = input("Enter message: ")
-        socket_helper.send_text_message(message, client_socket, AES_key, key_size)
-    else:
+        socket_helper.send_text_message(
+            message, client_socket, AES_key, key_size)
+    elif choice == 2:
         pass
+    elif choice == 3:
+        client_socket.send("bye".encode())
+        client_socket.close()
+        server_socket.close()
+        exit(0)

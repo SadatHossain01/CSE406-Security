@@ -2,6 +2,7 @@ from crypto_helper import generate_prime
 import random
 import time
 
+
 def generate_ecc_curve_params(prime_size):
     """
     Generates the parameters for an elliptic curve cryptography (ECC) curve.
@@ -125,6 +126,7 @@ def generate_shared_secret_key(rec_public_key, private_key, a, b, p):
         rec_public_key, private_key, a, b, p)
     return shared_secret_key
 
+
 trial_count = 5
 time_measures = dict()
 
@@ -138,7 +140,7 @@ if __name__ == "__main__":
             a, b, x, y, p = generate_ecc_curve_params(mode)
             print("Curve equation: y^2 = x^3 + {}x + {} mod {}".format(a, b, p))
             print("Base point: ({}, {})".format(x, y))
-            
+
             # Person 1
             # Generate the private and public keys
             t1 = time.time()
@@ -147,7 +149,7 @@ if __name__ == "__main__":
             print("Person 1's private key:", private_key1)
             print("Person 1's public key: ({} {})".format(
                 public_key1[0], public_key1[1]))
-            
+
             # Person 2
             # Generate the private and public keys
             t1 = time.time()
@@ -156,30 +158,33 @@ if __name__ == "__main__":
             print("Person 2's private key:", private_key2)
             print("Person 2's public key: ({} {})".format(
                 public_key2[0], public_key2[1]))
-            
+
             # Shared secret key for Person 1
             t1 = time.time()
             shared_secret_key1 = generate_shared_secret_key(
                 public_key2, private_key1, a, b, p)
             R_total_time += time.time() - t1
-            
+
             # Shared secret key for Person 2
             t1 = time.time()
             shared_secret_key2 = generate_shared_secret_key(
                 public_key1, private_key2, a, b, p)
             R_total_time += time.time() - t1
-            
+
             print("Shared secret key from Person 1:", shared_secret_key1[0])
             print("Shared secret key from Person 2:", shared_secret_key2[0])
-            
-        time_measures[mode] = (A_total_time / trial_count, B_total_time / trial_count, R_total_time / (2 * trial_count))
+
+        time_measures[mode] = (A_total_time / trial_count, B_total_time /
+                               trial_count, R_total_time / (2 * trial_count))
         time_measures[mode] = [1000 * x for x in time_measures[mode]]
-        
+
         print()
-    
+
     print("Computation Time Measurements: (in ms)")
     print("k\t\tA\t\t\tB\t\t\tR")
-    print("128\t\t{}\t{}\t{}".format(time_measures[128][0], time_measures[128][1], time_measures[128][2]))
-    print("192\t\t{}\t{}\t{}".format(time_measures[192][0], time_measures[192][1], time_measures[192][2]))
-    print("256\t\t{}\t{}\t{}".format(time_measures[256][0], time_measures[256][1], time_measures[256][2]))
-        
+    print("128\t\t{}\t{}\t{}".format(
+        time_measures[128][0], time_measures[128][1], time_measures[128][2]))
+    print("192\t\t{}\t{}\t{}".format(
+        time_measures[192][0], time_measures[192][1], time_measures[192][2]))
+    print("256\t\t{}\t{}\t{}".format(
+        time_measures[256][0], time_measures[256][1], time_measures[256][2]))

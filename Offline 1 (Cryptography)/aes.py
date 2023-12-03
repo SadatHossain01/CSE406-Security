@@ -2,6 +2,7 @@ import numpy as np
 from BitVector import BitVector
 from crypto_helper import *
 from bitvector_demo import Sbox, InvSbox, Mixer, InvMixer
+import time
 
 AES_modulus = BitVector(bitstring='100011011')
 
@@ -12,6 +13,8 @@ round_constants = np.zeros(15, dtype=np.uint8)
 round_keys = np.zeros((64, 4), dtype=np.uint8)
 
 # key will be a byte array
+
+
 def schedule_key(key, key_size):
     key = fix_key(key, key_size)
     assert len(key) == key_size // 8
@@ -84,6 +87,8 @@ def galois_multiplication(A, B, rowA, rowB, colB):
     return result
 
 # data will be a byte array
+
+
 def AES_encryption(data, AES_key_size):
     assert len(data) == 16
     n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
@@ -128,6 +133,8 @@ def AES_encryption(data, AES_key_size):
     return cipher_data
 
 # cipher_data will be a byte array
+
+
 def AES_decryption(cipher_data, AES_key_size):
     assert len(cipher_data) == 16
     n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
@@ -161,10 +168,11 @@ def AES_decryption(cipher_data, AES_key_size):
     return plaintext
 
 # both data and key will be byte arrays
+
+
 def encrypt(data, key, init_vector, key_size):
     if not key_expanded:
-        schedule_key(key)
-
+        schedule_key(key, key_size)
     data = pad_bytes(data, False)
     # print("Before Encryption After Padding:")
     # print_hex_byte_string(data)
@@ -178,25 +186,27 @@ def encrypt(data, key, init_vector, key_size):
         vector = AES_encryption(xor_bytes(block, vector), key_size)
         cipher_data[idx:idx + 16] = vector.copy()
         idx += 16
-        
+
     # print("After Encryption:")
     # print_hex_byte_string(cipher_data)
-        
+
     return cipher_data
 
 # both cipher and key will be byte arrays
+
+
 def decrypt(cipher_data, key, init_vector, key_size):
     if not key_expanded:
-        schedule_key(key)
-        
+        schedule_key(key, key_size)
+
     # print("Before Decryption:")
     # print_hex_byte_string(cipher_data)
-        
+
     blocks = [cipher_data[i:i + 16] for i in range(0, len(cipher_data), 16)]
     data = np.zeros(len(cipher_data), dtype=np.uint8)
     vector = init_vector
     idx = 0
-    
+
     for block in blocks:
         result = xor_bytes(AES_decryption(block, key_size), vector)
         vector = block
@@ -216,41 +226,40 @@ if __name__ == "__main__":
     # inp2 = "Two One Nine Two"
     # inp1 = "BUET CSE19 Batch"
     # inp2 = "Never Gonna Give you up"
-    
+
     inp1 = input("Enter Key: ")
     inp2 = input("Enter Message: ")
-    
+
     key = string_to_bytes(inp1)
     key = fix_key(key, AES_key_size)
     message = string_to_bytes(inp2)
-    
+
     print_text_details("Key", key, True)
     print_text_details("Plain Text", message, True)
-    
+
     # s = "Thats my Kung Fu"
     # initialization_vector = string_to_bytes(s)
     initialization_vector = np.array([0] * 16, dtype=np.uint8)
-    
-    
+
     # Key Schedule
     t1 = time.time()
     schedule_key(key, AES_key_size)
     schedule_time = (time.time() - t1) * 1000
-    
+
     # Encryption
     t1 = time.time()
     cipher = encrypt(message, key, initialization_vector, AES_key_size)
     cipher_time = (time.time() - t1) * 1000
-    
+
     # Decryption
     t1 = time.time()
     deciphered = decrypt(cipher, key, initialization_vector, AES_key_size)
     decipher_time = (time.time() - t1) * 1000
-    
+
     print("AES-" + str(AES_key_size) + " Encryption:\n")
     print_text_details("Ciphered Text", cipher, False)
     print_text_details("Deciphered Text", deciphered, False)
-    
+
     print("Execution Time Details:")
     print("Key Schedule Time:", schedule_time, "ms")
     print("Encryption Time:", cipher_time, "ms")

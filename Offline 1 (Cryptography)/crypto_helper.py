@@ -1,20 +1,21 @@
 import numpy as np
 import random
-import _testimportmultiple
 from sympy import nextprime
-    
-    
+
+
 def print_byte_string(arr):
     for val in arr:
         print(chr(val), end="")
     print()
-    
+
+
 def print_hex_byte_string(arr):
     for val in arr:
         if val < 16:
             print("0", end="")
         print(hex(val)[2:], end=" ")
     print()
+
 
 def print_hex_array(arr):
     # arr is 1D
@@ -23,6 +24,7 @@ def print_hex_array(arr):
             print("0", end="")
         print(hex(val)[2:], end=" ")
     print()
+
 
 def print_hex_matrix(mat):
     for row in mat:
@@ -53,6 +55,8 @@ def print_text_details(title, data, ascii_first):
     print()
 
 # data will be a byte array
+
+
 def bytes_to_matrix(data):
     # construct a 4x4 matrix of uint8 data type from the data
     assert len(data) == 16
@@ -73,6 +77,8 @@ def matrix_to_bytes(mat):
     return res
 
 # both arr1 and arr2 will be numpy arrays of uint8
+
+
 def xor_bytes(arr1, arr2):
     assert len(arr1) == len(arr2)
     result = np.zeros(len(arr1), dtype=np.uint8)
@@ -89,6 +95,8 @@ def substitute_bytes(arr, src):
     return substituted
 
 # data will be a byte array
+
+
 def pad_bytes(data, space_padding=False):
     if (len(data) % 16 == 0 and space_padding):
         return data
@@ -106,6 +114,8 @@ def pad_bytes(data, space_padding=False):
     return res
 
 # data will be a byte array
+
+
 def unpad_bytes(data, space_padding=False):
     # remove the padding
     assert len(data) % 16 == 0
@@ -113,7 +123,8 @@ def unpad_bytes(data, space_padding=False):
         return data
     else:
         extra = data[-1] if data[-1] != 0 else 16
-        return data[:-extra]
+        length = len(data)
+        return data[:length - extra]
 
 
 def generate_prime(size_bits):
@@ -127,6 +138,8 @@ def generate_prime(size_bits):
 
 # key will be a byte array
 # expected size is in bits
+
+
 def fix_key(key, expected_size):
     expected_bytes = expected_size // 8
     res = np.zeros(expected_bytes, dtype=np.uint8)
@@ -135,11 +148,19 @@ def fix_key(key, expected_size):
     return res
 
 # returns a numpy array of uint8
+
+
 def string_to_bytes(str):
     return np.array([ord(char) for char in str], dtype=np.uint8)
 
+
+def bytes_to_string(arr):
+    return "".join([chr(val) for val in arr])
+
 # returns a numpy byte array of uint8, having length len (len bytes)
 # if len is -1, then the length of the array is the minimum required to store the number
+
+
 def int_to_bytes(num, len=-1):
     if len == -1:
         len = (num.bit_length() + 7) // 8
@@ -148,6 +169,7 @@ def int_to_bytes(num, len=-1):
     for i in range(len):
         res[i] = int(bits[i * 8:(i + 1) * 8], 2)
     return res
+
 
 def generate_iv():
     res = np.zeros(16, dtype=np.uint8)
