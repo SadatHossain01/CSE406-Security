@@ -2,3 +2,5 @@
 */.vscode
 */.~*
 */__pycache__
+get-pip.py
+.vscode/settings.json

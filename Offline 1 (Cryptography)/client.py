@@ -1,50 +1,51 @@
 import socket
 import aes
 import ecc
+import socket_helper
+import crypto_helper
 
 # Server information
 server_ip = 'localhost'
 server_port = 12345
 
-
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((server_ip, server_port))
 
-params = client_socket.recv(8192).decode()
 print("Hello From Bob:")
-print("Parameters Received From Alice:\n" + params)
 
-stuffs = params.split('\n')
-a = int(stuffs[0][3:])
-b = int(stuffs[1][3:])
-x = int(stuffs[2][3:])
-y = int(stuffs[3][3:])
-p = int(stuffs[4][3:])
-key_size = int(stuffs[5][3:])
-initialization_vector = stuffs[6][4:]
-# print(a, b, x, y, p, initialization_vector)
+# Receive the ECC parameters and Alice's public key from Alice
+a, b, x, y, p, key_size, pub_key = socket_helper.receive_ecc_params(client_socket)
+print("Parameters Received From Alice:\n" + "a = " + str(a) + "\nb = " + str(b) + "\nx = " + str(x) + "\ny = " + str(y) + "\np = " + str(p) + "\nKey Size = " + str(key_size))
+print("Alice's Public Key: " + str(pub_key))
 
-# Receive Alice's public key
-other_public_key = client_socket.recv(8192).decode()
-print("Alice's Public Key: " + str(other_public_key))
-
-other_pub_x = int(other_public_key.split(',')[0])
-other_pub_y = int(other_public_key.split(',')[1])
-
-# Compute and send the public key to Alice
+# Compute own public and private keys
 my_private_key, my_public_key = ecc.generate_keys((x, y), a, b, p, key_size)
-msg = str(my_public_key[0]) + "," + str(my_public_key[1])
-client_socket.send(msg.encode())
 
-shared_secret_key = ecc.generate_shared_secret_key(
-    (other_pub_x, other_pub_y), my_private_key, a, b, p)
+# Send the public key to Alice
+client_socket.send((str(my_public_key[0]) + "," + str(my_public_key[1])).encode())
+
+# Compute the shared secret key
+shared_secret_key = ecc.generate_shared_secret_key(pub_key, my_private_key, a, b, p)
 print("Shared Secret Key: " + str(shared_secret_key))
+key_byte_array = crypto_helper.int_to_bytes(shared_secret_key[0])
+AES_key = crypto_helper.fix_key(key_byte_array, key_size)
 
-key = str(shared_secret_key[0])
 
-msg = client_socket.recv(8192).decode()
-print("Encrypted Message Received: " + msg)
-decrypted_msg = aes.decrypt(msg, key, initialization_vector, key_size)
-print("Decrypted Message: " + decrypted_msg)
-
-client_socket.close()
+# Hear ready from Alice
+reply = client_socket.recv(1024).decode()
+if reply == "ready":
+    print("Alice is ready to for communication.")
+    # Say ready to Alice
+    client_socket.send("ready".encode())
+else:
+    print("Alice is not ready to for communication.")
+    exit(0)
+    
+while True:
+    msg_type = client_socket.recv(1024).decode()
+    
+    if msg_type == "text":
+        text = socket_helper.receive_text_message(client_socket, AES_key, key_size)
+        print("Alice: " + text)
+    else:
+        pass

@@ -1,12 +1,9 @@
 import numpy as np
 from BitVector import BitVector
-from helper import *
+from crypto_helper import *
 from bitvector_demo import Sbox, InvSbox, Mixer, InvMixer
 
 AES_modulus = BitVector(bitstring='100011011')
-AES_key_size = 256  # can be 128, 192, or 256 bits
-n_rounds = 0
-# initialization_vector = "\x00" * 16
 
 key_expanded = False
 
@@ -14,12 +11,11 @@ key_expanded = False
 round_constants = np.zeros(15, dtype=np.uint8)
 round_keys = np.zeros((64, 4), dtype=np.uint8)
 
-
-def schedule_key(key):
-    key = fix_key(key, AES_key_size // 8)
-    assert len(key) == AES_key_size // 8
-    global n_rounds
-    n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
+# key will be a byte array
+def schedule_key(key, key_size):
+    key = fix_key(key, key_size)
+    assert len(key) == key_size // 8
+    n_rounds = 10 if key_size == 128 else 12 if key_size == 192 else 14
 
     global round_keys  # array of key matrices
     global key_expanded
@@ -34,16 +30,16 @@ def schedule_key(key):
 
     # so now the first 4 (or 6 or 8) words of the round key are placed
 
-    key_length_in_word = AES_key_size // 32
+    key_length_in_word = key_size // 32
 
     # https://engineering.purdue.edu/kak/compsec/NewLectures/Lecture8.pdf
     # https://en.wikipedia.org/wiki/AES_key_schedule
     for i in range(len(key)):
-        round_keys[i // 4][i % 4] = ord(key[i])
+        round_keys[i // 4][i % 4] = key[i]
 
     for idx in range(0, 4 * (n_rounds + 1)):
         if idx < key_length_in_word:
-            round_keys[idx] = [ord(key[idx * 4 + i]) for i in range(4)]
+            round_keys[idx] = [key[idx * 4 + i] for i in range(4)]
         elif idx % key_length_in_word == 0:
             res = np.roll(round_keys[idx - 1], -1)
             res = substitute_bytes(res, Sbox)
@@ -87,10 +83,11 @@ def galois_multiplication(A, B, rowA, rowB, colB):
 
     return result
 
-
-def AES_encryption(plaintext):
-    assert len(plaintext) == 16
-    state_matrix = string_to_matrix(plaintext)
+# data will be a byte array
+def AES_encryption(data, AES_key_size):
+    assert len(data) == 16
+    n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
+    state_matrix = bytes_to_matrix(data)
     key_matrix = generate_key_matrix(0)
 
     # print_round_details(0, state_matrix, key_matrix)
@@ -127,13 +124,14 @@ def AES_encryption(plaintext):
         # print("After Round Key:")
         # print_hex_matrix(state_matrix)
 
-    ciphertext = matrix_to_string(state_matrix)
-    return ciphertext
+    cipher_data = matrix_to_bytes(state_matrix)
+    return cipher_data
 
-
-def AES_decryption(ciphertext):
-    assert len(ciphertext) == 16
-    state_matrix = string_to_matrix(ciphertext)
+# cipher_data will be a byte array
+def AES_decryption(cipher_data, AES_key_size):
+    assert len(cipher_data) == 16
+    n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
+    state_matrix = bytes_to_matrix(cipher_data)
     key_matrix = generate_key_matrix(n_rounds)
 
     # Round 10
@@ -159,75 +157,100 @@ def AES_decryption(ciphertext):
             state_matrix = galois_multiplication(
                 InvMixer, state_matrix, 4, 4, 4)
 
-    plaintext = matrix_to_string(state_matrix)
+    plaintext = matrix_to_bytes(state_matrix)
     return plaintext
 
-
-def encrypt(message, key, init_vector, key_size):
-    global AES_key_size
-    AES_key_size = key_size
+# both data and key will be byte arrays
+def encrypt(data, key, init_vector, key_size):
     if not key_expanded:
         schedule_key(key)
 
-    message = pad_string(message, False)
+    data = pad_bytes(data, False)
     # print("Before Encryption After Padding:")
-    # print_hex_string(message)
+    # print_hex_byte_string(data)
 
-    # split the message into 16 byte blocks
-    blocks = [message[i:i + 16] for i in range(0, len(message), 16)]
-    ciphertext = ""
+    # split the data into 16 byte blocks
+    blocks = [data[i:i + 16] for i in range(0, len(data), 16)]
+    cipher_data = np.zeros(len(data), dtype=np.uint8)
     vector = init_vector
+    idx = 0
     for block in blocks:
-        vector = AES_encryption(xor_strings(block, vector))
-        ciphertext += vector
-    return ciphertext
+        vector = AES_encryption(xor_bytes(block, vector), key_size)
+        cipher_data[idx:idx + 16] = vector.copy()
+        idx += 16
+        
+    # print("After Encryption:")
+    # print_hex_byte_string(cipher_data)
+        
+    return cipher_data
 
-
-def decrypt(cipher, key, init_vector, key_size):
-    global AES_key_size
-    AES_key_size = key_size
+# both cipher and key will be byte arrays
+def decrypt(cipher_data, key, init_vector, key_size):
     if not key_expanded:
         schedule_key(key)
-    blocks = [cipher[i:i + 16] for i in range(0, len(cipher), 16)]
-    plaintext = ""
+        
+    # print("Before Decryption:")
+    # print_hex_byte_string(cipher_data)
+        
+    blocks = [cipher_data[i:i + 16] for i in range(0, len(cipher_data), 16)]
+    data = np.zeros(len(cipher_data), dtype=np.uint8)
     vector = init_vector
+    idx = 0
+    
     for block in blocks:
-        result = xor_strings(AES_decryption(block), vector)
+        result = xor_bytes(AES_decryption(block, key_size), vector)
         vector = block
-        plaintext += result
+        data[idx:idx + 16] = result.copy()
+        idx += 16
 
     # print("After Decryption Before Unpadding:")
-    # print_hex_string(plaintext)
-    plaintext = unpad_string(plaintext, False)
-
-    return plaintext
+    # print_hex_byte_string(data)
+    data = unpad_bytes(data, False)
+    return data
 
 
 if __name__ == "__main__":
-    AES_key_size = int(input("Enter AES Key Size (128, 192, 256): "))
-    # key = "BUET CSE19 Batch 2023 Fall Semester"
-    # message = "Never Gonna Give You Up"
-    # key = "Thats my Kung Fu"
-    # message = "Two One Nine Two"
+    AES_key_size = int(input("Enter AES Key Size (128, 192, 256 bits): "))
 
-    key = input("Enter Key: ")
-    message = input("Enter Message: ")
-
-    key = fix_key(key, AES_key_size // 8)
-    print("AES-" + str(AES_key_size) + " Encryption")
+    # inp1 = "Thats my Kung Fu"
+    # inp2 = "Two One Nine Two"
+    # inp1 = "BUET CSE19 Batch"
+    # inp2 = "Never Gonna Give you up"
+    
+    inp1 = input("Enter Key: ")
+    inp2 = input("Enter Message: ")
+    
+    key = string_to_bytes(inp1)
+    key = fix_key(key, AES_key_size)
+    message = string_to_bytes(inp2)
+    
     print_text_details("Key", key, True)
     print_text_details("Plain Text", message, True)
-
-    any, schedule_time = measure_execution_time(
-        schedule_key, "Key Schedule", key)
-    cipher, cipher_time = measure_execution_time(
-        encrypt, "Encryption", message)
-    deciphered, decipher_time = measure_execution_time(
-        decrypt, "Decryption", cipher)
-
+    
+    # s = "Thats my Kung Fu"
+    # initialization_vector = string_to_bytes(s)
+    initialization_vector = np.array([0] * 16, dtype=np.uint8)
+    
+    
+    # Key Schedule
+    t1 = time.time()
+    schedule_key(key, AES_key_size)
+    schedule_time = (time.time() - t1) * 1000
+    
+    # Encryption
+    t1 = time.time()
+    cipher = encrypt(message, key, initialization_vector, AES_key_size)
+    cipher_time = (time.time() - t1) * 1000
+    
+    # Decryption
+    t1 = time.time()
+    deciphered = decrypt(cipher, key, initialization_vector, AES_key_size)
+    decipher_time = (time.time() - t1) * 1000
+    
+    print("AES-" + str(AES_key_size) + " Encryption:\n")
     print_text_details("Ciphered Text", cipher, False)
     print_text_details("Deciphered Text", deciphered, False)
-
+    
     print("Execution Time Details:")
     print("Key Schedule Time:", schedule_time, "ms")
     print("Encryption Time:", cipher_time, "ms")
