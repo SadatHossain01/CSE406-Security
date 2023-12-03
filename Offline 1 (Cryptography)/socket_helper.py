@@ -1,5 +1,6 @@
 import aes
 import crypto_helper
+import numpy as np
 
 
 def send_ecc_params(a, b, x, y, p, key_size, pub_key, socket):
@@ -39,3 +40,55 @@ def receive_text_message(socket, key, key_size):
     decrypted_data = aes.decrypt(encrypted_data, key, iv, key_size)
     text = crypto_helper.bytes_to_string(decrypted_data)
     return text
+
+
+def send_file(file_path, socket, key, key_size):
+    # Read the file into a byte array
+    try:
+        with open(file_path, 'rb') as file:
+            file_data = file.read()
+    except:
+        print("File not found.")
+        return
+
+    # First send a "file" string to indicate that the message is a file
+    socket.send("file".encode())
+    # Then send the file name
+    socket.send(file_path.encode())
+    iv = crypto_helper.generate_iv()
+
+    data = bytearray(file_data)
+    encrypted_data = aes.encrypt(
+        data, key, iv, key_size)
+    socket.send(iv.tobytes() + encrypted_data.tobytes())
+
+    print("File sent.")
+
+
+def receive_file(socket, key, key_size):
+    # First receive the file name
+    file_name = socket.recv(8192).decode()
+    print("File name: " + file_name)
+
+    # Then receive the file data
+    data = bytes([])
+    buffer = socket.recv(8192)
+    data += buffer
+    # while buffer:
+    #     data += buffer
+    #     buffer = socket.recv(8192)
+
+    print("Encrypted data length: " + str(len(data)) + "bytes")
+
+    iv = data[:16]
+    encrypted_data = data[16:]
+    decrypted_data = aes.decrypt(encrypted_data, key, iv, key_size)
+
+    print("Decrypted data length: " + str(len(decrypted_data)) + "bytes")
+
+    # write this byte array to a new file
+    final_bytes = decrypted_data.tobytes()
+    new_path = "new_" + file_name
+    with open(new_path, 'wb') as file:
+        file.write(final_bytes)
+    print("File received and saved to " + new_path)

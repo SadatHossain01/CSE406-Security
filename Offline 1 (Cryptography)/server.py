@@ -70,7 +70,9 @@ while True:
         socket_helper.send_text_message(
             message, client_socket, AES_key, key_size)
     elif choice == 2:
-        pass
+        print("Enter file path: ", end="")
+        file_path = input()
+        socket_helper.send_file(file_path, client_socket, AES_key, key_size)
     elif choice == 3:
         client_socket.send("bye".encode())
         client_socket.close()

@@ -49,11 +49,13 @@ while True:
     msg_type = client_socket.recv(1024).decode()
 
     if msg_type == "text":
+        print("Receiving a text message from Alice.")
         text = socket_helper.receive_text_message(
             client_socket, AES_key, key_size)
         print("Alice: " + text)
     elif msg_type == "file":
-        pass
+        print("Receiving a file from Alice.")
+        socket_helper.receive_file(client_socket, AES_key, key_size)
     elif msg_type == "bye":
         print("Alice has left the chat.")
         client_socket.close()
