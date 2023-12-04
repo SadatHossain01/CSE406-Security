@@ -1,8 +1,9 @@
 import socket
-import aes
-import ecc
-import socket_helper
-import crypto_helper
+import importlib
+
+ecc = importlib.import_module("1905001_ecc")
+socket_helper = importlib.import_module("1905001_socket_helper")
+crypto_helper = importlib.import_module("1905001_crypto_helper")
 
 # Server information
 server_ip = 'localhost'
@@ -46,17 +47,18 @@ else:
     exit(0)
 
 while True:
-    msg_type = client_socket.recv(1024).decode()
-
-    if msg_type == "text":
-        print("Receiving a text message from Alice.")
+    start_msg = client_socket.recv(1024).decode()
+    print("Message Type: " + start_msg.split('|')[0])
+    if start_msg[0] == "t":
+        print("Receiving a text message from Alice...")
         text = socket_helper.receive_text_message(
             client_socket, AES_key, key_size)
         print("Alice: " + text)
-    elif msg_type == "file":
-        print("Receiving a file from Alice.")
-        socket_helper.receive_file(client_socket, AES_key, key_size)
-    elif msg_type == "bye":
+    elif start_msg[0] == "f":
+        file_name = start_msg.split('|')[1]
+        print("Receiving file " + file_name + " from Alice...")
+        socket_helper.receive_file(client_socket, AES_key, key_size, file_name)
+    elif start_msg == "bye":
         print("Alice has left the chat.")
         client_socket.close()
         exit(0)

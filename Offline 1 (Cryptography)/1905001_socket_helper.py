@@ -1,6 +1,9 @@
-import aes
-import crypto_helper
-import numpy as np
+import importlib
+import os
+from typing import final
+
+aes = importlib.import_module("1905001_aes")
+crypto_helper = importlib.import_module("1905001_crypto_helper")
 
 
 def send_ecc_params(a, b, x, y, p, key_size, pub_key, socket):
@@ -51,10 +54,9 @@ def send_file(file_path, socket, key, key_size):
         print("File not found.")
         return
 
-    # First send a "file" string to indicate that the message is a file
-    socket.send("file".encode())
-    # Then send the file name
-    socket.send(file_path.encode())
+    # First send a "file" string to indicate that the message is a file, also send the file name
+    ss = "file|" + file_path.split('/')[-1]
+    socket.send(ss.encode())
     iv = crypto_helper.generate_iv()
 
     data = bytearray(file_data)
@@ -65,30 +67,36 @@ def send_file(file_path, socket, key, key_size):
     print("File sent.")
 
 
-def receive_file(socket, key, key_size):
-    # First receive the file name
-    file_name = socket.recv(8192).decode()
-    print("File name: " + file_name)
+def create_directory(directory_name):
+    current_directory = os.getcwd()
+    final_directory = os.path.join(current_directory, directory_name)
+    if not os.path.exists(final_directory):
+        os.makedirs(final_directory)
+    return final_directory
 
-    # Then receive the file data
+
+def receive_file(socket, key, key_size, file_name):
+    # Receive the file data
     data = bytes([])
-    buffer = socket.recv(8192)
+    buffer = socket.recv(1048576)
     data += buffer
     # while buffer:
     #     data += buffer
     #     buffer = socket.recv(8192)
 
-    print("Encrypted data length: " + str(len(data)) + "bytes")
+    print("Encrypted data length: " + str(len(data)) + " bytes")
 
     iv = data[:16]
     encrypted_data = data[16:]
     decrypted_data = aes.decrypt(encrypted_data, key, iv, key_size)
 
-    print("Decrypted data length: " + str(len(decrypted_data)) + "bytes")
+    print("Decrypted data length: " + str(len(decrypted_data)) + " bytes")
+
+    download_directory = create_directory("Downloads")
 
     # write this byte array to a new file
     final_bytes = decrypted_data.tobytes()
-    new_path = "new_" + file_name
+    new_path = os.path.join(download_directory, file_name)
     with open(new_path, 'wb') as file:
         file.write(final_bytes)
     print("File received and saved to " + new_path)

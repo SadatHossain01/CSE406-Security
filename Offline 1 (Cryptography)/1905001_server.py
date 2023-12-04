@@ -1,8 +1,11 @@
 import socket
 import socketserver
-import ecc
-import socket_helper
-import crypto_helper
+import importlib
+
+ecc = importlib.import_module("1905001_ecc")
+socket_helper = importlib.import_module("1905001_socket_helper")
+crypto_helper = importlib.import_module("1905001_crypto_helper")
+
 
 # Server information
 server_ip = 'localhost'

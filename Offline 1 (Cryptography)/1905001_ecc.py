@@ -1,27 +1,17 @@
-from crypto_helper import generate_prime
 import random
 import time
+import importlib
+
+crypto_helper = importlib.import_module("1905001_crypto_helper")
+
+# Curve Equation: y^2 = x^3 + ax + b mod p
+# Non-singularity condition: 4a^3 + 27b^2 != 0 mod p
+# prime_size (128, 192 or 256 bits) is the size of the prime number (in bits) used for generating the curve
+# Returns a, b, x, y, p
 
 
 def generate_ecc_curve_params(prime_size):
-    """
-    Generates the parameters for an elliptic curve cryptography (ECC) curve.
-    Curve Equation: y^2 = x^3 + ax + b mod p
-    Non-singularity condition: 4a^3 + 27b^2 != 0 mod p
-
-    Args:
-        prime_size (int): The size of the prime number used for generating the curve.
-
-    Returns:
-        tuple: A tuple containing the parameters of the ECC curve in the following order:
-            - a (int): The coefficient 'a' in the curve equation.
-            - b (int): The coefficient 'b' in the curve equation.
-            - x (int): The x-coordinate of a point on the curve.
-            - y (int): The y-coordinate of a point on the curve.
-            - p (int): The prime number used for generating the curve.
-    """
-
-    p = int(generate_prime(prime_size) or 0)
+    p = int(crypto_helper.generate_prime(prime_size) or 0)
 
     while True:
         # Choose random x, y, a
@@ -38,21 +28,10 @@ def generate_ecc_curve_params(prime_size):
 
     return a, b, x, y, p
 
+# Does both point addition or doubling depending on whether p1 == p2
+
 
 def ec_point_addition(p1, p2, a, b, p):
-    """
-    Performs point addition or doubling on an elliptic curve.
-
-    Args:
-        p1 (tuple): The coordinates of the first point (x1, y1).
-        p2 (tuple): The coordinates of the second point (x2, y2).
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the resulting point after the addition or doubling (x3, y3).
-    """
     if p1[0] == p2[0] and p1[1] == p2[1]:
         # Point doubling
         s = ((3 * p1[0]**2 + a) * pow(2 * p1[1], -1, p)) % p
@@ -64,21 +43,10 @@ def ec_point_addition(p1, p2, a, b, p):
     y3 = (s * (p1[0] - x3) - p1[1]) % p
     return (x3, y3)
 
+# Uses binary exponentiation to perform point multiplication
+
 
 def point_multiplication(point, d, a, b, p):
-    """
-    Performs point multiplication on an elliptic curve.
-
-    Args:
-        point (tuple): The coordinates of the point to be multiplied (x, y).
-        d (int): The scalar value by which the point is multiplied.
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the resulting point after the multiplication (x', y').
-    """
     res = point
     d >>= 1
     while d > 0:
@@ -88,42 +56,20 @@ def point_multiplication(point, d, a, b, p):
         d >>= 1
     return res
 
+# Generates a pair of private and public keys for elliptic curve cryptography
+
 
 def generate_keys(point, a, b, p, prime_size):
-    """
-    Generates a pair of private and public keys for elliptic curve cryptography.
-
-    Args:
-        point (tuple): The base point on the elliptic curve.
-        a (int): The coefficient 'a' of the elliptic curve equation.
-        b (int): The coefficient 'b' of the elliptic curve equation.
-        p (int): The prime modulus of the elliptic curve.
-        prime_size (int): The size of the prime number used for generating the private key.
-
-    Returns:
-        tuple: A tuple containing the private key and the corresponding public key.
-    """
     private_key = random.getrandbits(prime_size)
     public_key = point_multiplication(point, private_key, a, b, p)
     return (private_key, public_key)
 
+# Generates the shared secret key for elliptic curve cryptography (ECC)
 
-def generate_shared_secret_key(rec_public_key, private_key, a, b, p):
-    """
-    Generates the shared secret key for elliptic curve cryptography (ECC).
 
-    Args:
-        rec_public_key (tuple): The coordinates of the recipient's public key point (x', y').
-        private_key (int): The private key.
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the shared secret key point (x'', y'').
-    """
+def generate_shared_secret_key(other_public_key, own_private_key, a, b, p):
     shared_secret_key = point_multiplication(
-        rec_public_key, private_key, a, b, p)
+        other_public_key, own_private_key, a, b, p)
     return shared_secret_key
 
 
