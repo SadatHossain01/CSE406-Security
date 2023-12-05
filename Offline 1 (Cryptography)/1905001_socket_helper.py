@@ -1,6 +1,6 @@
+import numpy as np
 import importlib
 import os
-from typing import final
 
 aes = importlib.import_module("1905001_aes")
 crypto_helper = importlib.import_module("1905001_crypto_helper")
@@ -76,6 +76,9 @@ def create_directory(directory_name):
 
 
 def receive_file(socket, key, key_size, file_name):
+    """
+    Maximum file size: 1 MB
+    """
     # Receive the file data
     data = bytes([])
     buffer = socket.recv(1048576)
@@ -86,8 +89,10 @@ def receive_file(socket, key, key_size, file_name):
 
     print("Encrypted data length: " + str(len(data)) + " bytes")
 
-    iv = data[:16]
-    encrypted_data = data[16:]
+    iv = np.zeros(16, dtype=np.uint8)
+    encrypted_data = np.zeros(len(data) - 16, dtype=np.uint8)
+    iv = [data[i] for i in range(16)]
+    encrypted_data = [data[i] for i in range(16, len(data))]
     decrypted_data = aes.decrypt(encrypted_data, key, iv, key_size)
 
     print("Decrypted data length: " + str(len(decrypted_data)) + " bytes")

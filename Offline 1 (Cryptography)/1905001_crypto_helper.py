@@ -79,7 +79,9 @@ def print_hex_byte_string(arr):
 
 
 def print_hex_array(arr):
-    # arr is 1D
+    """
+    arr: an 1D array of uint8
+    """
     for val in arr:
         if val < 16:
             print("0", end="")
@@ -115,10 +117,11 @@ def print_text_details(title, data, ascii_first):
         print_byte_string(data)
     print()
 
-# data will be a byte array
-
 
 def bytes_to_matrix(data):
+    """
+    data: a byte array
+    """
     # construct a 4x4 matrix of uint8 data type from the data
     assert len(data) == 16
     mat = np.zeros((4, 4), dtype=np.uint8)
@@ -129,7 +132,9 @@ def bytes_to_matrix(data):
 
 
 def matrix_to_bytes(mat):
-    # transpose the matrix to get the row major orientation
+    """
+    The matrix is assumed to be in column major orientation
+    """
     mat = np.transpose(mat)
     res = np.zeros(16, dtype=np.uint8)
     for i in range(4):
@@ -137,10 +142,28 @@ def matrix_to_bytes(mat):
             res[i * 4 + j] = mat[i][j]
     return res
 
-# both arr1 and arr2 will be numpy arrays of uint8
+
+def add_scalar(byte_arr, scalar):
+    """
+    Simulates adding a scalar to the number represented by the byte array
+    """
+    length = len(byte_arr)
+    res = np.zeros(length, dtype=np.uint8)
+    res[:] = byte_arr[:]
+    for i in range(length - 1, -1, -1):
+        to_add = min(scalar, 255 - res[i])
+        res[i] += to_add
+        scalar -= to_add
+        if scalar == 0:
+            break
+    return res
 
 
 def xor_bytes(arr1, arr2):
+    """
+    arr1: a numpy array of uint8
+    arr2: a numpy array of uint8
+    """
     assert len(arr1) == len(arr2)
     result = np.zeros(len(arr1), dtype=np.uint8)
     for i in range(len(arr1)):
@@ -149,16 +172,19 @@ def xor_bytes(arr1, arr2):
 
 
 def substitute_bytes(arr, src):
-    # arr can be 1D or 2D
+    """
+    arr: 1D or 2D numpy array of uint8
+    """
     flat_array = arr.flatten()
     substituted = np.array([src[val] for val in flat_array])
     substituted = substituted.reshape(arr.shape)
     return substituted
 
-# data will be a byte array
-
 
 def pad_bytes(data, space_padding):
+    """
+    data: a byte array
+    """
     if (len(data) % 16 == 0 and space_padding):
         return data
     res = np.zeros(len(data) + (16 - len(data) % 16), dtype=np.uint8)
@@ -174,11 +200,11 @@ def pad_bytes(data, space_padding):
             res[len(data):] = [rem] * rem
     return res
 
-# data will be a byte array
-
 
 def unpad_bytes(data, space_padding=False):
-    # remove the padding
+    """
+    data: a byte array
+    """
     assert len(data) % 16 == 0
     if space_padding:
         return data
@@ -189,6 +215,9 @@ def unpad_bytes(data, space_padding=False):
 
 
 def generate_prime(size_bits):
+    """
+    Generates a prime number of the specified size (bits)
+    """
     # Generate a random number of the specified size
     num = random.getrandbits(size_bits)
 
@@ -197,18 +226,18 @@ def generate_prime(size_bits):
 
     return prime
 
-# key will be a byte array
-# expected size is in bits
-
 
 def fix_key(key, expected_size):
+    """
+    key: a byte array
+    expected_size: in bits
+    Returns: a numpy array of uint8
+    """
     expected_bytes = expected_size // 8
     res = np.zeros(expected_bytes, dtype=np.uint8)
     for i in range(expected_bytes):
         res[i] = key[i % len(key)]
     return res
-
-# returns a numpy array of uint8
 
 
 def string_to_bytes(str):
@@ -218,11 +247,12 @@ def string_to_bytes(str):
 def bytes_to_string(arr):
     return "".join([chr(val) for val in arr])
 
-# returns a numpy byte array of uint8, having length len (len bytes)
-# if len is -1, then the length of the array is the minimum required to store the number
-
 
 def int_to_bytes(num, len=-1):
+    """
+    Returns: a numpy byte array of uint8, which has length len (len bytes)\n
+    if len is -1, then the length of the array is the minimum required to store the number
+    """
     if len == -1:
         len = (num.bit_length() + 7) // 8
     bits = np.binary_repr(num, width=len * 8)

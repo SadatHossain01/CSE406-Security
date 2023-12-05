@@ -2,6 +2,8 @@ import numpy as np
 from BitVector import BitVector
 import time
 import importlib
+import threading
+import copy
 
 crypto_helper = importlib.import_module("1905001_crypto_helper")
 
@@ -13,10 +15,11 @@ key_expanded = False
 round_constants = np.zeros(15, dtype=np.uint8)
 round_keys = np.zeros((64, 4), dtype=np.uint8)
 
-# key will be a byte array
-
 
 def schedule_key(key, key_size):
+    """
+    key: a byte array
+    """
     key = crypto_helper.fix_key(key, key_size)
     assert len(key) == key_size // 8
     n_rounds = 10 if key_size == 128 else 12 if key_size == 192 else 14
@@ -71,7 +74,9 @@ def schedule_key(key, key_size):
 
 
 def generate_key_matrix(round):
-    # the key matrix will be of 4x4 size
+    """
+    key_matrix: a 4x4 numpy array of uint8
+    """
     key_matrix = np.zeros((4, 4), dtype=np.uint8)
     for i in range(4):
         key_matrix[:, i] = round_keys[4 * round + i]
@@ -88,10 +93,11 @@ def galois_multiplication(A, B, rowA, rowB, colB):
 
     return result
 
-# data will be a byte array
-
 
 def AES_encryption(data, AES_key_size):
+    """
+    data: a byte array
+    """
     assert len(data) == 16
     n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
     state_matrix = crypto_helper.bytes_to_matrix(data)
@@ -136,10 +142,11 @@ def AES_encryption(data, AES_key_size):
     cipher_data = crypto_helper.matrix_to_bytes(state_matrix)
     return cipher_data
 
-# cipher_data will be a byte array
-
 
 def AES_decryption(cipher_data, AES_key_size):
+    """
+    cipher_data: a byte array
+    """
     assert len(cipher_data) == 16
     n_rounds = 10 if AES_key_size == 128 else 12 if AES_key_size == 192 else 14
     state_matrix = crypto_helper.bytes_to_matrix(cipher_data)
@@ -172,11 +179,63 @@ def AES_decryption(cipher_data, AES_key_size):
     deciphered_data = crypto_helper.matrix_to_bytes(state_matrix)
     return deciphered_data
 
-# both data and key will be byte arrays
-# By default, do proper padding (unambiguous padding)
+
+def CTR_block_encryption(block_data, nonce, key_size, array, idx):
+    encrypted = AES_encryption(nonce, key_size)
+    array[idx:idx + 16] = crypto_helper.xor_bytes(block_data, encrypted)
 
 
-def encrypt(data, key, init_vector, key_size, space_padding=False):
+def CTR_encryption_decryption(blocks, init_vector, key_size):
+    """
+    blocks: plain data blocks for encryption, cipher data blocks for decryption
+    Returns: cipher data blocks for encryption, plain data blocks for decryption
+    """
+    res_data = np.zeros(16 * len(blocks), dtype=np.uint8)
+    nonce = init_vector
+    idx = 0
+    threads = []
+    for block in blocks:
+        t = threading.Thread(target=CTR_block_encryption,
+                             args=(block, nonce, key_size, res_data, idx))
+        threads.append(t)
+        nonce = crypto_helper.add_scalar(nonce, 1)
+        idx += 16
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    return res_data
+
+
+def CBC_encryption(blocks, init_vector, key_size):
+    cipher_data = np.zeros(16 * len(blocks), dtype=np.uint8)
+    vector = init_vector.copy()
+    idx = 0
+    for block in blocks:
+        xored = crypto_helper.xor_bytes(block, vector)
+        cipher_data[idx:idx + 16] = AES_encryption(xored, key_size)
+        vector = np.copy(cipher_data[idx:idx + 16])
+        idx += 16
+    return cipher_data
+
+
+def CBC_decryption(blocks, init_vector, key_size):
+    deciphered_data = np.zeros(16 * len(blocks), dtype=np.uint8)
+    vector = init_vector.copy()
+    idx = 0
+    for block in blocks:
+        result = crypto_helper.xor_bytes(
+            AES_decryption(block, key_size), vector)
+        vector = copy.deepcopy(block)
+        deciphered_data[idx:idx + 16] = result.copy()
+        idx += 16
+    return deciphered_data
+
+
+def encrypt(data, key, init_vector, key_size, space_padding=False, ctr_mode=True):
+    """
+    data: a byte array
+    key: a byte array
+    Default: CTR mode, proper padding
+    """
     if not key_expanded:
         schedule_key(key, key_size)
     data = crypto_helper.pad_bytes(data, space_padding)
@@ -185,24 +244,21 @@ def encrypt(data, key, init_vector, key_size, space_padding=False):
 
     # split the data into 16 byte blocks
     blocks = [data[i:i + 16] for i in range(0, len(data), 16)]
-    cipher_data = np.zeros(len(data), dtype=np.uint8)
-    vector = init_vector
-    idx = 0
-    for block in blocks:
-        vector = AES_encryption(
-            crypto_helper.xor_bytes(block, vector), key_size)
-        cipher_data[idx:idx + 16] = vector.copy()
-        idx += 16
+
+    cipher_data = CTR_encryption_decryption(blocks, np.copy(init_vector), key_size) if ctr_mode else CBC_encryption(
+        blocks, np.copy(init_vector), key_size)
 
     # print("After Encryption:")
     # crypto_helper.print_hex_byte_string(cipher_data)
 
     return cipher_data
 
-# both cipher and key will be byte arrays
 
-
-def decrypt(cipher_data, key, init_vector, key_size, space_padding=False):
+def decrypt(cipher_data, key, init_vector, key_size, space_padding=False, ctr_mode=True):
+    """
+    cipher_data: a byte array
+    key: a byte array
+    """
     if not key_expanded:
         schedule_key(key, key_size)
 
@@ -210,30 +266,26 @@ def decrypt(cipher_data, key, init_vector, key_size, space_padding=False):
     # crypto_helper.print_hex_byte_string(cipher_data)
 
     blocks = [cipher_data[i:i + 16] for i in range(0, len(cipher_data), 16)]
-    data = np.zeros(len(cipher_data), dtype=np.uint8)
-    vector = init_vector
-    idx = 0
 
-    for block in blocks:
-        result = crypto_helper.xor_bytes(
-            AES_decryption(block, key_size), vector)
-        vector = block
-        data[idx:idx + 16] = result.copy()
-        idx += 16
+    data = CTR_encryption_decryption(blocks, np.copy(init_vector), key_size) if ctr_mode else CBC_decryption(
+        blocks, np.copy(init_vector), key_size)
 
     # print("After Decryption Before Unpadding:")
     # crypto_helper.print_hex_byte_string(data)
+
     data = crypto_helper.unpad_bytes(data, space_padding)
+
     return data
 
 
 if __name__ == "__main__":
     AES_key_size = int(input("Enter AES Key Size (128, 192, 256 bits): "))
+    mode_choice = int(input("Enter Mode (1 for CTR, 2 for CBC): "))
 
     # inp1 = "Thats my Kung Fu"
     # inp2 = "Two One Nine Two"
     # inp1 = "BUET CSE19 Batch"
-    # inp2 = "Never Gonna Give you up"
+    # inp2 = "Never Gonna Give you up, Never"
 
     inp1 = input("Enter Key: ")
     inp2 = input("Enter Message: ")
@@ -242,12 +294,13 @@ if __name__ == "__main__":
     key = crypto_helper.fix_key(key, AES_key_size)
     message = crypto_helper.string_to_bytes(inp2)
 
-    crypto_helper.print_text_details("Key", key, True)
-    crypto_helper.print_text_details("Plain Text", message, True)
-
-    # s = "Thats my Kung Fu"
+    # s = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     # initialization_vector = crypto_helper.string_to_bytes(s)
     initialization_vector = np.array([0] * 16, dtype=np.uint8)
+
+    crypto_helper.print_text_details("Key", key, True)
+    crypto_helper.print_text_details("Plain Text", message, True)
+    crypto_helper.print_text_details("IV", initialization_vector, True)
 
     # Key Schedule
     t1 = time.time()
@@ -257,17 +310,19 @@ if __name__ == "__main__":
     # Encryption
     t1 = time.time()
     # Doing space padding for this task
-    cipher = encrypt(message, key, initialization_vector, AES_key_size, True)
+    cipher = encrypt(message, key, initialization_vector,
+                     AES_key_size, space_padding=True, ctr_mode=True if mode_choice == 1 else False)
     cipher_time = (time.time() - t1) * 1000
 
     # Decryption
     t1 = time.time()
     # Doing space padding for this task
     deciphered = decrypt(
-        cipher, key, initialization_vector, AES_key_size, True)
+        cipher, key, initialization_vector, AES_key_size, space_padding=True, ctr_mode=True if mode_choice == 1 else False)
     decipher_time = (time.time() - t1) * 1000
 
-    print("AES-" + str(AES_key_size) + " Encryption:\n")
+    print("AES-" + str(AES_key_size) + " Encryption (" +
+          ("CTR" if mode_choice == 1 else "CBC") + " Mode): ")
     crypto_helper.print_text_details("Ciphered Text", cipher, False)
     crypto_helper.print_text_details("Deciphered Text", deciphered, False)
 
