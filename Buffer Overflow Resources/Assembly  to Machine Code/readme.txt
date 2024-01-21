@@ -1,0 +1,1 @@
+Alternatively, just go to https://defuse.ca/online-x86-assembler.htm#disassembly and convert assembly to machine code (and vice versa).
