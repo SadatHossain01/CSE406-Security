@@ -1,26 +1,18 @@
-from crypto_helper import generate_prime
 import random
 import time
+import importlib
+
+crypto_helper = importlib.import_module("1905001_crypto_helper")
+
 
 def generate_ecc_curve_params(prime_size):
     """
-    Generates the parameters for an elliptic curve cryptography (ECC) curve.
     Curve Equation: y^2 = x^3 + ax + b mod p
     Non-singularity condition: 4a^3 + 27b^2 != 0 mod p
-
-    Args:
-        prime_size (int): The size of the prime number used for generating the curve.
-
-    Returns:
-        tuple: A tuple containing the parameters of the ECC curve in the following order:
-            - a (int): The coefficient 'a' in the curve equation.
-            - b (int): The coefficient 'b' in the curve equation.
-            - x (int): The x-coordinate of a point on the curve.
-            - y (int): The y-coordinate of a point on the curve.
-            - p (int): The prime number used for generating the curve.
+    prime_size: 128, 192 or 256 bits
+    Returns: a, b, x, y, p
     """
-
-    p = int(generate_prime(prime_size) or 0)
+    p = int(crypto_helper.generate_prime(prime_size) or 0)
 
     while True:
         # Choose random x, y, a
@@ -40,17 +32,7 @@ def generate_ecc_curve_params(prime_size):
 
 def ec_point_addition(p1, p2, a, b, p):
     """
-    Performs point addition or doubling on an elliptic curve.
-
-    Args:
-        p1 (tuple): The coordinates of the first point (x1, y1).
-        p2 (tuple): The coordinates of the second point (x2, y2).
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the resulting point after the addition or doubling (x3, y3).
+    Does both point addition or doubling depending on whether p1 == p2
     """
     if p1[0] == p2[0] and p1[1] == p2[1]:
         # Point doubling
@@ -66,17 +48,7 @@ def ec_point_addition(p1, p2, a, b, p):
 
 def point_multiplication(point, d, a, b, p):
     """
-    Performs point multiplication on an elliptic curve.
-
-    Args:
-        point (tuple): The coordinates of the point to be multiplied (x, y).
-        d (int): The scalar value by which the point is multiplied.
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the resulting point after the multiplication (x', y').
+    Use binary exponentiation to perform point multiplication
     """
     res = point
     d >>= 1
@@ -90,40 +62,21 @@ def point_multiplication(point, d, a, b, p):
 
 def generate_keys(point, a, b, p, prime_size):
     """
-    Generates a pair of private and public keys for elliptic curve cryptography.
-
-    Args:
-        point (tuple): The base point on the elliptic curve.
-        a (int): The coefficient 'a' of the elliptic curve equation.
-        b (int): The coefficient 'b' of the elliptic curve equation.
-        p (int): The prime modulus of the elliptic curve.
-        prime_size (int): The size of the prime number used for generating the private key.
-
-    Returns:
-        tuple: A tuple containing the private key and the corresponding public key.
+    Generates a pair of private and public keys for elliptic curve cryptography
     """
     private_key = random.getrandbits(prime_size)
     public_key = point_multiplication(point, private_key, a, b, p)
     return (private_key, public_key)
 
 
-def generate_shared_secret_key(rec_public_key, private_key, a, b, p):
+def generate_shared_secret_key(other_public_key, own_private_key, a, b, p):
     """
-    Generates the shared secret key for elliptic curve cryptography (ECC).
-
-    Args:
-        rec_public_key (tuple): The coordinates of the recipient's public key point (x', y').
-        private_key (int): The private key.
-        a (int): The coefficient 'a' in the curve equation.
-        b (int): The coefficient 'b' in the curve equation.
-        p (int): The prime number used for generating the curve.
-
-    Returns:
-        tuple: The coordinates of the shared secret key point (x'', y'').
+    Generates the shared secret key for elliptic curve cryptography (ECC)
     """
     shared_secret_key = point_multiplication(
-        rec_public_key, private_key, a, b, p)
+        other_public_key, own_private_key, a, b, p)
     return shared_secret_key
+
 
 trial_count = 5
 time_measures = dict()
@@ -138,7 +91,7 @@ if __name__ == "__main__":
             a, b, x, y, p = generate_ecc_curve_params(mode)
             print("Curve equation: y^2 = x^3 + {}x + {} mod {}".format(a, b, p))
             print("Base point: ({}, {})".format(x, y))
-            
+
             # Person 1
             # Generate the private and public keys
             t1 = time.time()
@@ -147,7 +100,7 @@ if __name__ == "__main__":
             print("Person 1's private key:", private_key1)
             print("Person 1's public key: ({} {})".format(
                 public_key1[0], public_key1[1]))
-            
+
             # Person 2
             # Generate the private and public keys
             t1 = time.time()
@@ -156,30 +109,33 @@ if __name__ == "__main__":
             print("Person 2's private key:", private_key2)
             print("Person 2's public key: ({} {})".format(
                 public_key2[0], public_key2[1]))
-            
+
             # Shared secret key for Person 1
             t1 = time.time()
             shared_secret_key1 = generate_shared_secret_key(
                 public_key2, private_key1, a, b, p)
             R_total_time += time.time() - t1
-            
+
             # Shared secret key for Person 2
             t1 = time.time()
             shared_secret_key2 = generate_shared_secret_key(
                 public_key1, private_key2, a, b, p)
             R_total_time += time.time() - t1
-            
+
             print("Shared secret key from Person 1:", shared_secret_key1[0])
             print("Shared secret key from Person 2:", shared_secret_key2[0])
-            
-        time_measures[mode] = (A_total_time / trial_count, B_total_time / trial_count, R_total_time / (2 * trial_count))
+
+        time_measures[mode] = (A_total_time / trial_count, B_total_time /
+                               trial_count, R_total_time / (2 * trial_count))
         time_measures[mode] = [1000 * x for x in time_measures[mode]]
-        
+
         print()
-    
+
     print("Computation Time Measurements: (in ms)")
     print("k\t\tA\t\t\tB\t\t\tR")
-    print("128\t\t{}\t{}\t{}".format(time_measures[128][0], time_measures[128][1], time_measures[128][2]))
-    print("192\t\t{}\t{}\t{}".format(time_measures[192][0], time_measures[192][1], time_measures[192][2]))
-    print("256\t\t{}\t{}\t{}".format(time_measures[256][0], time_measures[256][1], time_measures[256][2]))
-        
+    print("128\t\t{}\t{}\t{}".format(
+        time_measures[128][0], time_measures[128][1], time_measures[128][2]))
+    print("192\t\t{}\t{}\t{}".format(
+        time_measures[192][0], time_measures[192][1], time_measures[192][2]))
+    print("256\t\t{}\t{}\t{}".format(
+        time_measures[256][0], time_measures[256][1], time_measures[256][2]))
