@@ -4,3 +4,12 @@
 */__pycache__
 get-pip.py
 .vscode/settings.json
+*.out
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.xml
+*.pygtex
+*.pygstyle
