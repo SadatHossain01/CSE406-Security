@@ -2,7 +2,7 @@
     window.onload = function() {
         var ts = elgg.security.token.__elgg_ts;
         var token = elgg.security.token.__elgg_token;
-        var name = elgg.session.user.name;
+        var userName = elgg.session.user.name;
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/thewire/add";

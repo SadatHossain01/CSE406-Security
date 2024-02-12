@@ -73,7 +73,7 @@ Task 2:
 </script>
 
 Task 4:
-<script id=worm>
+<script id="worm">
 	var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
 	var jsCode = document.getElementById("worm").innerHTML;
 	var tailTag = "</" + "script>";
