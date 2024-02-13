@@ -1,8 +1,8 @@
 <script type="text/javascript">
-    window.onload = function() {
+    window.onload = function () {
         var ts = elgg.security.token.__elgg_ts;
         var token = elgg.security.token.__elgg_token;
-        var userName = elgg.session.user.name;
+        var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/thewire/add";
@@ -16,7 +16,7 @@
         formData.append('__elgg_token', token);
         formData.append('__elgg_ts', ts);
         formData.append('body', postBody);
-        
+
 
         var ajax = new XMLHttpRequest();
         ajax.open("POST", sendurl, true);

