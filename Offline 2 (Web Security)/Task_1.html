@@ -11,9 +11,9 @@
 
         var sendurl = `/action/friends/add?friend=${myID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
 
-        //Create and send Ajax request to add friend
+        // Create and send Ajax request to add friend
         Ajax = new XMLHttpRequest();
-        Ajax.open("GET", sendurl, true); // last boolean value is for asynchronous request making
+        Ajax.open("GET", sendurl, true); // Last boolean value is for asynchronous request making
         Ajax.setRequestHeader("Host", "www.seed-server.com");
         Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         Ajax.send();

