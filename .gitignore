@@ -13,3 +13,5 @@ get-pip.py
 *.xml
 *.pygtex
 *.pygstyle
+*.synctex(busy)
+*.gz
