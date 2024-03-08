@@ -1,0 +1,28 @@
+\section{Overview of Ghidra}
+
+\subsection{History and development}
+Ghidra was developed by the National Security Agency as an internal tool for analyzing malware, viruses, and other executable files. After years of internal use, the NSA decided to release Ghidra as an open-source project in 2019. This allowed the software reverse engineering community to collaborate in enhancing and expanding Ghidra's capabilities.
+
+\subsection{Core capabilities}
+Ghidra provides a comprehensive set of static and dynamic analysis features centered around disassembly and decompilation. Key capabilities include:
+
+\begin{enumerate}
+    \item Disassembly - Extracting assembly code from executable binaries
+    \item Decompilation - Reconstructing high-level source code structures
+    \item Control flow graphs - Visually mapping program execution flows
+    \item Data type analysis - Inferring variable types and data structures
+    \item Patching binaries - Modifying compiled code and re-exporting it
+    \item Scripting API - Support for headless analysis using Python and Java
+    \item Structural analysis - Identifying objects, classes, and complex data structures
+    \item Import analysis - Determining imported libraries and external functions called
+\end{enumerate}
+
+
+\subsection{Supported processors and file formats}
+Ghidra supports a wide variety of processor instruction sets including X86, ARM, MIPS, PowerPC, Sparc, and more. It can analyze executable file formats like ELF and PE. Ghidra's module architecture allows support for additional processors and file types to be added.
+
+\subsection{Plugins and extensions}
+Ghidra has a plug-in system that lets users add new functionality. There are both analysis plugins that unlock new reverse engineering capabilities, as well as UI plugins for improved usability. Popular plugins include decompiler extensions, vulnerability detectors, and import/export utilities.
+
+\subsection{Comparison to other tools}
+Ghidra is often compared to IDA Pro as one of the most fully-featured reverse engineering platforms. Unlike IDA, Ghidra is free and open-source. Ghidra excels in areas like decompilation and data type analysis. Other tools like Radare2 provide scriptable command line interfaces. Ghidra balances both GUI and headless usage models.
