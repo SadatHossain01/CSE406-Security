@@ -1,0 +1,65 @@
+\section{Installation Prerequisites}
+\subsection{System Requirements}
+\subsubsection{Hardware Specifications}
+
+The scale of hardware requisite directly correlates with the quantity of endpoints and cloud services to be secured. This correlation aids in estimating the volume of data analysis and the accumulation of security alerts.
+
+For typical use cases, the consolidation of the Wazuh server, indexer, and dashboard within a single host configuration usually suffices, as this is adequate for supervising no more than 100 endpoints and maintaining ninety days of accessible alert data. The following table delineates the advisable hardware for an initial setup:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Endpoints} & \textbf{CPU} & \textbf{RAM} & \textbf{Storage (90 days)} \\ \hline
+1–25      & 4 vCPU    & 8 GiB & 50 GB             \\ \hline
+25–50     & 8 vCPU    & 8 GiB & 100 GB            \\ \hline
+50–100    & 8 vCPU    & 8 GiB & 200 GB            \\ \hline
+\end{tabular}
+\caption{Recommended Hardware for Quickstart Deployment}
+\label{table:hardware_req}
+\end{table}
+
+
+In scenarios involving broader infrastructures, a segmented deployment is suggested. The Wazuh server and indexer can be configured into multi-node clusters to enhance scalability and facilitate load distribution.
+
+\subsubsection{Operating System Compatibility}
+
+The Wazuh core components necessitate a 64-bit Linux-based installation environment. The subsequent versions of operating systems are endorsed in the official documentation:
+
+\begin{itemize}
+\item Amazon Linux 2
+\item CentOS 7, 8
+\item Red Hat Enterprise Linux 7, 8, 9
+\item Ubuntu 16.04, 18.04, 20.04, 22.04
+\end{itemize}
+
+\subsubsection{Web Browser Support}
+
+The Wazuh dashboard is compatible with the following browsers:
+
+\begin{itemize}
+\item Chrome 95 or newer
+\item Firefox 93 or newer
+\item Safari 13.7 or newer
+\end{itemize}
+
+\subsection{Configuring the Machines}
+\subsubsection{Wazuh Server}
+\begin{itemize}
+    \item \textbf{Computer Name:} CSE406-wazuh-server
+    \item \textbf{Operating System:} Linux 20.04 (V1 x64)
+    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Public IP:} 4.213.17.59
+    \item \textbf{Private IP:} 10.0.0.5
+\end{itemize}
+
+\subsubsection{Wazuh Agent}
+\begin{itemize}
+    \item \textbf{Computer Name:} CSE406-wazuh-agent-linux
+    \item \textbf{Operating System:} Linux 20.04 (V2 x64)
+    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 10.0.0.4
+\end{itemize}
+
+
