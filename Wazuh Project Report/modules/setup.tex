@@ -1,3 +1,4 @@
+\newpage
 \section{Installation}
 \subsection{Setting Up the Wazuh Server}
 
@@ -51,7 +52,7 @@ Registering new agents becomes way too easy once the server is set up. The proce
   \item Go to Agents \(\rightarrow\) Deploy New Agent as shown in the following image:
     \begin{figure}[H]
       \centering
-      \includegraphics[width=\textwidth]{images/newagent-option.png}
+      \includegraphics[width=\textwidth]{images/setup/newagent-option.png}
       \caption{Wazuh Dashboard - Deploy New Agent}
     \end{figure}
   \item There, provide the necessary information like Agent OS, Server address, Agent name and Agent group (last two are optional).
@@ -60,7 +61,7 @@ Registering new agents becomes way too easy once the server is set up. The proce
     \item \textbf{Linux:}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.6\textwidth]{images/wazuh-agent-commands-linux.png}
+      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-linux.png}
       \caption{Wazuh Agent Installation Commands for a Linux Machine}
     \end{figure}
     \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
@@ -73,7 +74,7 @@ sudo systemctl start wazuh-agent
     \item \textbf{MacOS:}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.6\textwidth]{images/wazuh-agent-commands-mac.png}
+      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-mac.png}
       \caption{Wazuh Agent Installation Commands for a macOS Machine}
     \end{figure}
     \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
@@ -84,8 +85,8 @@ sudo /Library/Ossec/bin/wazuh-control start
     \item \textbf{Windows:}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.6\textwidth]{images/wazuh-agent-commands-win.png}
-      \caption{Wazuh Agent Installation Commands for a Windows}
+      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-win.png}
+      \caption{Wazuh Agent Installation Commands for a Windows Machine}
     \end{figure}
     \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
 Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.2-1.msi -OutFile ${env.tmp}\wazuh-agent; msiexec.exe /i ${env.tmp}\wazuh-agent /q WAZUH_MANAGER='20.2.220.92' WAZUH_REGISTRATION_SERVER='20.2.220.92' 
@@ -94,3 +95,13 @@ NET START WazuhSvc
 \end{itemize}
 
   \end{itemize}
+
+We installed all three types of agents, as said earlier. There were multiple iterations of setting up the agents. In some instances, the agent had to be reinstalled in the same device with a different name.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/setup/all-agents.png}
+    \caption{Installed Agents}
+    \label{fig:installed-agents}
+\end{figure}
+
+Finally, we ended up working with the agent IDs as mentioned in \ref{installed-agents}.

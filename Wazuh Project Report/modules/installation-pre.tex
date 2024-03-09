@@ -1,3 +1,4 @@
+\newpage
 \section{Installation Prerequisites}
 \subsection{System Requirements}
 \subsubsection{Hardware Specifications}
@@ -44,22 +45,64 @@ The Wazuh dashboard is compatible with the following browsers:
 \end{itemize}
 
 \subsection{Configuring the Machines}
+
 \subsubsection{Wazuh Server}
 \begin{itemize}
-    \item \textbf{Computer Name:} CSE406-wazuh-server
+    \item \textbf{Computer Name:} wazuh-server
     \item \textbf{Operating System:} Linux 20.04 (V1 x64)
     \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
-    \item \textbf{Public IP:} 4.213.17.59
+    \item \textbf{Public IP:} 20.2.220.92
     \item \textbf{Private IP:} 10.0.0.5
 \end{itemize}
 
-\subsubsection{Wazuh Agent}
+\subsubsection{Wazuh Agents}
+\label{installed-agents}
+\paragraph{Agent ID: 001}
 \begin{itemize}
-    \item \textbf{Computer Name:} CSE406-wazuh-agent-linux
-    \item \textbf{Operating System:} Linux 20.04 (V2 x64)
+    \item \textbf{Computer Name:} wazuh-agent-linux-1
+    \item \textbf{Operating System:} Ubuntu 22.04.3 LTS
+    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 10.0.0.6
+\end{itemize}
+
+\paragraph{Agent ID: 002}
+\begin{itemize}
+    \item \textbf{Computer Name:} wazuh-agent-win
+    \item \textbf{Operating System:} Microsoft Windows 11 Pro 10.0.22000.2538
     \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 10.0.0.4
 \end{itemize}
+
+\paragraph{Agent ID: 007}
+\begin{itemize}
+    \item \textbf{Computer Name:} seed-vm
+    \item \textbf{Operating System:} Ubuntu 20.04.6 LTS
+    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 10.0.0.4
+\end{itemize}
+
+
+\paragraph{Agent ID: 008}
+\begin{itemize}
+    \item \textbf{Computer Name:} Sadat-Linux
+    \item \textbf{Operating System:} Ubuntu 20.04.6 LTS
+    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 10.0.0.4
+\end{itemize}
+
+\paragraph{Agent ID: 009}
+Understably, macOS integration could not be done on a virtual machine. We used a physical machine for this purpose.
+\begin{itemize}
+    \item \textbf{Computer Name:} fahad-air-42
+    \item \textbf{Operating System:} macOS 13.5.2
+    \item \textbf{Size:} Apple M1, 8-core CPU, 8GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 192.168.0.197
+\end{itemize}
+
 
 
