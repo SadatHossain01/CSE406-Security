@@ -17,6 +17,7 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{nameref}
+\usepackage{pifont}
 \usepackage{authblk}
 \usepackage{csquotes}
 \usepackage{biblatex}
@@ -27,19 +28,19 @@
 \usepackage{blindtext}
 \usepackage{xcolor}
 \definecolor{LightGray}{gray}{0.95}
+\usepackage{minted}
+\setminted{
+  tabsize=2,
+  breaklines=true,
+  breakanywhere=true,
+  bgcolor=LightGray
+}
 \usepackage{algpseudocode}
 \usepackage[label=corner]{karnaugh-map}
 \usepackage[siunitx, RPvoltages]{circuitikz}
 \usetikzlibrary{calc}
 \usepackage{tikz}
 \usetikzlibrary{positioning, shapes, arrows.meta, calc}
-\usepackage{minted}
-\setminted[c]{
-mathescape,
-linenos,
-numbersep=5pt,
-autogobble
-}
 \usepackage{tikz}
 \usetikzlibrary{mindmap}
 \usepackage[pdf]{graphviz}

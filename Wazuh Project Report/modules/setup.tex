@@ -9,13 +9,13 @@ We adopted this way to install the Wazuh Server. This is a straightforward all-i
 \begin{enumerate}
   \item Download and run the Wazuh installation assistant.
 
-  \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
+  \begin{minted}{bash}
 curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
   \end{minted}
 
   \item Once the assistant finishes, the output will display the access credentials and confirm successful installation.
 
-  \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{text}
+  \begin{minted}{text}
 INFO: --- Summary ---
 INFO: You can access the web interface https://<wazuh-dashboard-ip>
 User: admin
@@ -27,7 +27,7 @@ INFO: Installation finished.
 
   \item Access the Wazuh web interface at \url{https://<wazuh-dashboard-ip>} using the provided credentials:
 
-    \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{text}
+    \begin{minted}{text}
 Username: admin
 Password: <ADMIN_PASSWORD>
     \end{minted}
@@ -35,7 +35,7 @@ Password: <ADMIN_PASSWORD>
   \item Upon first access, a browser warning about the certificate may appear. This is normal because the certificate was not issued by a recognized authority. You may accept the certificate as an exception or configure a certificate from a trusted authority.
 
   \item The passwords for all Wazuh indexer and Wazuh API users can be found in the file named \texttt{wazuh-passwords.txt}, which is inside \texttt{wazuh-install-files.tar}. To display them, execute:
-  \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
+  \begin{minted}{bash}
 sudo tar -O -xvf wazuh-install-files.tar && wazuh-install-files/wazuh-passwords.txt
   \end{minted}
 
@@ -49,7 +49,7 @@ Please refer to the Wazuh official documentation \href{https://documentation.waz
 \subsection{Registering Agents}
 Registering new agents becomes way too easy once the server is set up. The procedure is stated as follows:
 \begin{itemize}
-  \item Go to Agents \(\rightarrow\) Deploy New Agent as shown in the following image:
+  \item Navigate to \texttt{Agents > Deploy New Agents} as shown in the following image:
     \begin{figure}[H]
       \centering
       \includegraphics[width=\textwidth]{images/setup/newagent-option.png}
@@ -57,44 +57,45 @@ Registering new agents becomes way too easy once the server is set up. The proce
     \end{figure}
   \item There, provide the necessary information like Agent OS, Server address, Agent name and Agent group (last two are optional).
   \item Finally, two sets of commands will be shown, running which should be enough to install and initiate Wazuh Agent on the given machine.
-  \begin{itemize}
-    \item \textbf{Linux:}
+  
+  \subsubsection{Linux}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-linux.png}
+      \includegraphics[width=\textwidth]{images/setup/wazuh-agent-commands-linux.png}
       \caption{Wazuh Agent Installation Commands for a Linux Machine}
     \end{figure}
-    \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
+    The commands in the picture go as follows:
+    \begin{minted}{bash}
 wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.2-1_amd64.deb && sudo WAZUH_MANAGER='20.2.220.92' dpkg -i ./wazuh-agent_4.7.2-1_amd64.deb
 sudo systemctl daemon-reload
 sudo systemctl enable wazuh-agent
 sudo systemctl start wazuh-agent
     \end{minted}
 
-    \item \textbf{MacOS:}
+    \subsubsection{MacOS}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-mac.png}
+      \includegraphics[width=\textwidth]{images/setup/wazuh-agent-commands-mac.png}
       \caption{Wazuh Agent Installation Commands for a macOS Machine}
     \end{figure}
-    \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
+    The commands are:
+    \begin{minted}{bash}
 curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.2-1.arm64.pkg && echo "WAZUH_MANAGER='20.2.220.92'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /
 sudo /Library/Ossec/bin/wazuh-control start
     \end{minted}
 
-    \item \textbf{Windows:}
+    \subsubsection{Windows}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.55\textwidth]{images/setup/wazuh-agent-commands-win.png}
+      \includegraphics[width=\textwidth]{images/setup/wazuh-agent-commands-win.png}
       \caption{Wazuh Agent Installation Commands for a Windows Machine}
     \end{figure}
-    \begin{minted}[tabsize=2,breaklines=true,breakanywhere=true,bgcolor=LightGray]{bash}
+    The commands are compiled here:
+    \begin{minted}{powershell}
 Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.2-1.msi -OutFile ${env.tmp}\wazuh-agent; msiexec.exe /i ${env.tmp}\wazuh-agent /q WAZUH_MANAGER='20.2.220.92' WAZUH_REGISTRATION_SERVER='20.2.220.92' 
 NET START WazuhSvc
     \end{minted}
 \end{itemize}
-
-  \end{itemize}
 
 We installed all three types of agents, as said earlier. There were multiple iterations of setting up the agents. In some instances, the agent had to be reinstalled in the same device with a different name.
 \begin{figure}[H]
@@ -104,4 +105,4 @@ We installed all three types of agents, as said earlier. There were multiple ite
     \label{fig:installed-agents}
 \end{figure}
 
-Finally, we ended up working with the agent IDs as mentioned in \ref{installed-agents}.
+Finally, we ended up working with the agent IDs mentioned in \ref{installed-agents}.

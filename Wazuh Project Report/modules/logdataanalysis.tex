@@ -37,42 +37,42 @@ On devices where Wazuh Agent can be installed, log files can be monitored by sim
 \subparagraph{Monitoring Basic Log Files}
 Configuration for monitoring basic log files involves inserting the \texttt{localfile} XML blocks into the \texttt{ossec.conf} file of the Wazuh agent. The following is an illustrative example:
 
-\begin{lstlisting}[language=XML]
+\begin{minted}{xml}
 <localfile>
     <location>/path/to/log/file.log</location>
     <log_format>syslog</log_format>
 </localfile>
-\end{lstlisting}
+\end{minted}
 
 \subparagraph{Monitoring Date-based Log Files}
 To adapt to dynamic file naming based on dates, the configuration supports strftime format. An example configuration is shown below:
 
-\begin{lstlisting}[language=XML]
+\begin{minted}{xml}
 <localfile>
     <location>/path/to/log/file-%y-%m-%d.log</location>
     <log_format>syslog</log_format>
 </localfile>
-\end{lstlisting}
+\end{minted}
 
 \subparagraph{Monitoring Using Wildcard Patterns}
 Wazuh allows for the use of wildcard patterns to monitor multiple log files within a directory. An example of such a configuration is:
 
-\begin{lstlisting}[language=XML]
+\begin{minted}{xml}
 <localfile>
     <location>/path/to/logs/file*.log</location>
     <log_format>syslog</log_format>
 </localfile>
-\end{lstlisting}
+\end{minted}
 
 \subparagraph{Utilizing Environment Variables in Log Monitoring}
 Particularly on Windows, Wazuh configurations can incorporate environment variables within log file paths, adding flexibility to the monitoring setup:
 
-\begin{lstlisting}[language=XML]
+\begin{minted}{xml}
 <localfile>
     <location>%WINDIR%\Logs\CustomLog.log</location>
     <log_format>syslog</log_format>
 </localfile>
-\end{lstlisting}
+\end{minted}
 
 \paragraph{Using Syslog}
 The Wazuh server can be configured to listen for incoming syslog messages on predefined ports, enabling support for devices without support for Wazuh Agent. The primary configuration adjustments are made using the \texttt{ossec.conf} file located on the server.
@@ -80,7 +80,7 @@ The Wazuh server can be configured to listen for incoming syslog messages on pre
 \subparagraph{Listening for Syslog Messages}
 The essential part of the configuration involves defining a \texttt{<remote>} block within the \texttt{ossec.conf} file of the Wazuh server. An example configuration is as follows:
 
-\begin{lstlisting}[language=XML]
+\begin{minted}{xml}
 <remote>
     <connection>syslog</connection>
     <port>514</port>
@@ -88,7 +88,7 @@ The essential part of the configuration involves defining a \texttt{<remote>} bl
     <allowed-ips>192.168.2.15/24</allowed-ips>
     <local_ip>192.168.2.10</local_ip>
 </remote>
-\end{lstlisting}
+\end{minted}
 
 In this context:
 \begin{itemize}
@@ -101,13 +101,13 @@ In this context:
 
 For changes to take effect, the Wazuh manager requires a restart. This is typically performed via the command:
 
-\begin{lstlisting}[language=bash]
-# systemctl restart wazuh-manager
-\end{lstlisting}
+\begin{minted}{bash}
+systemctl restart wazuh-manager
+\end{minted}
 
 \subsubsection{Simulation}
 We demonstrate the following two use-cases of Log Data Analysis.
-\paragraph{Linux log analysis using \texttt{rsyslog}}
+\paragraph{Linux Log Data Analysis using \texttt{rsyslog}}
 In this use case, we configure a \texttt{Ubuntu 20.04.6} endpoint to forward logs using rsyslog to the Wazuh server for analysis. On the \texttt{Ubuntu 20.04.6} endpoint, we create and delete the user account Alice. Wazuh has default rules that generate alerts for the creation and deletion of user accounts.
 
 \subparagraph{Ubuntu endpoint}
@@ -142,12 +142,33 @@ In this use case, we configure a \texttt{Ubuntu 20.04.6} endpoint to forward log
 
 We test the configuration in the next sub-section. 
 
-\paragraph{Windows log analysis using Wazuh Agent}
+\paragraph{Windows Log Data Analysis using Wazuh Agent}
+In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent for log data analysis. On \texttt{Windows 11} we install the software Dr. Memory. On the Wazuh Server we create rules for generating alerts when new software is installed.
 
+\subparagraph{Windows endpoint}
+\begin{enumerate}
+    \item We edit the Wazuh Agent configuration file at \texttt{C:/Program Files (x86)/ossec-agent/ossec.conf} and add the following block inside the \texttt{<ossec\_config>} tag.
+    \begin{figure} [H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/log-data/9.png}
+    \caption{Wazuh Agent configuration}
+    \end{figure}
+    \item We restart Wazuh Agent for the change to apply.
+\end{enumerate}
+
+\subparagraph{Wazuh server}
+\begin{enumerate}
+    \item We create or modify the following rule at \\ \texttt{/var/ossec/ruleset/rules/0585-win-application\_rules.xml} to generate alerts when new application is installed.
+    \begin{figure} [H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/log-data/10.png}
+    \caption{Wazuh server configuration}
+    \end{figure}
+    \item We restart Wazuh Manager for the configuration to take effect.
+\end{enumerate}
 
 \subsubsection{Dashboard Update}
-\paragraph{Testing Linux log analysis using \texttt{rsyslog}}
-\subparagraph{Ubuntu endpoint}
+\paragraph{Testing Linux Log Data Analysis using \texttt{rsyslog}}
 \begin{enumerate}
     \item We add the new user \texttt{Alice}
     \begin{figure} [H]
@@ -170,12 +191,30 @@ We test the configuration in the next sub-section.
     \item We expand the alert to see more details.
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/log-data/5.png}
+    \includegraphics[width=0.5\textwidth]{images/log-data/5.png}
     \caption{The name of the new user (red), the decoder used to process the log (blue)}
     \end{figure}
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/log-data/6.png}
     \caption{Details of the rule used to generate this alert}
+    \end{figure}
+\end{enumerate}
+
+
+\paragraph{Windows Log Data Analysis using Wazuh Agent}
+\begin{enumerate}
+    \item We download the software \href{https://drmemory.org}{Dr. Memory}.
+    \item We install the application on the \texttt{Windows 11} machine.
+    \begin{figure} [H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/log-data/11.png}
+    \caption{Installation of Dr. Memory}
+    \end{figure}
+    \item We navigate to the \texttt{Modules > Security events} tab in the Wazuh Dashboards to view the alert. 
+    \begin{figure} [H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/log-data/12.png}
+    \caption{Alert for new software installation}
     \end{figure}
 \end{enumerate}
