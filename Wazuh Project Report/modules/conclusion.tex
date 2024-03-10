@@ -1,1 +1,24 @@
-\section{Conclusion}
+\section{Issues Faced}
+\subsection{Server Crash: macOS Not Supporting Realtime Monitoring}
+\begin{itemize}
+    \item For the File Integrity Module (FIM), we were opting for realtime monitoring for both Windows and Linux.
+    \item But this configuration was not working on macOS. Later, we found out that macOS does not support realtime monitoring to begin with.
+    \item We had to set a monitoring frequency then. Naively, we chose 1 second.
+    \item Because of such frequent logging, the server could not take the load and suffered a crash.
+    \item Later, we changed the frequency to 1 minute and restarted the server. Things started working nicely afterwards.
+\end{itemize} 
+
+\subsection{Random Authentication Error on Server}
+\begin{itemize}
+    \item Strangely enough, at times, we could not login to Wazuh dashboard with appropriate username and passwords. It just said, incorrect username or password.
+    \item We examined the \texttt{wazuh-install-files/wazuh-passwords.txt} and saw our credentials were alright.
+    \item Even more strangely, everytime the problem got fixed by a restart of the server.
+\end{itemize}
+
+\subsection{Source Code Compilation Challenges}
+
+\section{Reference}
+\begin{itemize}
+    \item \href{https://documentation.wazuh.com}{The Official Wazuh Documentation}
+    \item \href{https://github.com/wazuh}{Wazuh GitHub Repositories}
+\end{itemize}

@@ -3,9 +3,7 @@
 \subsection{System Requirements}
 \subsubsection{Hardware Specifications}
 
-The scale of hardware requisite directly correlates with the quantity of endpoints and cloud services to be secured. This correlation aids in estimating the volume of data analysis and the accumulation of security alerts.
-
-For typical use cases, the consolidation of the Wazuh server, indexer, and dashboard within a single host configuration usually suffices, as this is adequate for supervising no more than 100 endpoints and maintaining ninety days of accessible alert data. The following table delineates the advisable hardware for an initial setup:
+The scale of hardware requisite directly correlates with the quantity of endpoints and cloud services. For typical use cases, the consolidation of the Wazuh server, indexer, and dashboard within a single host usually suffices, as this is adequate for supervising upto 100 endpoints and maintaining ninety days of accessible alert data. The following table delineates the advisable hardware for such an initial setup:
 
 \begin{table}[H]
 \centering
@@ -61,7 +59,7 @@ The Wazuh dashboard is compatible with the following browsers:
 \begin{itemize}
     \item \textbf{Computer Name:} wazuh-agent-linux-1
     \item \textbf{Operating System:} Ubuntu 22.04.3 LTS
-    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Size:} Standard B2s, 2 vCPUs, 4GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 10.0.0.6
 \end{itemize}
@@ -70,7 +68,7 @@ The Wazuh dashboard is compatible with the following browsers:
 \begin{itemize}
     \item \textbf{Computer Name:} wazuh-agent-win
     \item \textbf{Operating System:} Microsoft Windows 11 Pro 10.0.22000.2538
-    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Size:} Standard B2s, 2 vCPUs, 4GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 10.0.0.4
 \end{itemize}
@@ -79,7 +77,7 @@ The Wazuh dashboard is compatible with the following browsers:
 \begin{itemize}
     \item \textbf{Computer Name:} seed-vm
     \item \textbf{Operating System:} Ubuntu 20.04.6 LTS
-    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Size:} Standard B2s, 2 vCPUs, 4GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 10.0.0.4
 \end{itemize}
@@ -89,7 +87,7 @@ The Wazuh dashboard is compatible with the following browsers:
 \begin{itemize}
     \item \textbf{Computer Name:} Sadat-Linux
     \item \textbf{Operating System:} Ubuntu 20.04.6 LTS
-    \item \textbf{Size:} Standard B2s, 2 VCPUs, 4GB RAM
+    \item \textbf{Size:} Standard B2s, 2 vCPUs, 4GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 10.0.0.4
 \end{itemize}
@@ -102,6 +100,15 @@ Understandably, macOS integration could not be done on a virtual machine. We use
     \item \textbf{Size:} Apple M1, 8-core CPU, 8GB RAM
     \item \textbf{Public IP:} N/A
     \item \textbf{Private IP:} 192.168.0.197
+\end{itemize}
+
+\paragraph*{Agent ID: 010}
+\begin{itemize}
+    \item \textbf{Computer Name:} Sadat-Windows
+    \item \textbf{Operating System:} Microsoft Windows 11 Pro 10.0.22621.3155
+    \item \textbf{Size:} Standard DS2, 2 vCPUs, 7GB RAM
+    \item \textbf{Public IP:} N/A
+    \item \textbf{Private IP:} 10.1.0.4
 \end{itemize}
 
 

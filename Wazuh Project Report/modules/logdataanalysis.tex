@@ -31,6 +31,38 @@ In addition to alert logs, Wazuh stores all collected logs in dedicated archive 
 \subsubsection{Configuration}
 
 Wazuh supports two primary methods of log data collection.
+
+\paragraph{Using Syslog}
+The Wazuh server can be configured to listen for incoming syslog messages on predefined ports, enabling support for devices without support for Wazuh Agent. The primary configuration adjustments are made using the \texttt{ossec.conf} file located on the server.
+
+\subparagraph{Listening for Syslog Messages}
+The essential part of the configuration involves defining a \texttt{<remote>} block within the \texttt{ossec.conf} file of the Wazuh server. An example configuration is as follows:
+
+\begin{minted}{xml}
+<remote>
+    <connection>syslog</connection>
+    <port>514</port>
+    <protocol>tcp</protocol>
+    <allowed-ips>192.168.2.15/24</allowed-ips>
+    <local_ip>192.168.2.10</local_ip>
+</remote>
+\end{minted}
+
+In this context:
+\begin{itemize}
+    \item \texttt{<connection>} defines the connection type.
+    \item \texttt{<port>} specifies the listening port.
+    \item \texttt{<protocol>} indicates the communication protocol.
+    \item \texttt{<allowed-ips>} designates permitted sender IP addresses.
+    \item \texttt{<local\_ip>} is the server's IP address that will listen for log messages.
+\end{itemize}
+
+For changes to take effect, the Wazuh manager requires a restart. This is typically performed via the command:
+
+\begin{minted}{bash}
+systemctl restart wazuh-manager
+\end{minted}
+
 \paragraph{Using Wazuh Agent}
 On devices where Wazuh Agent can be installed, log files can be monitored by simply changing the agent configuration.
 
@@ -74,36 +106,6 @@ Particularly on Windows, Wazuh configurations can incorporate environment variab
 </localfile>
 \end{minted}
 
-\paragraph{Using Syslog}
-The Wazuh server can be configured to listen for incoming syslog messages on predefined ports, enabling support for devices without support for Wazuh Agent. The primary configuration adjustments are made using the \texttt{ossec.conf} file located on the server.
-
-\subparagraph{Listening for Syslog Messages}
-The essential part of the configuration involves defining a \texttt{<remote>} block within the \texttt{ossec.conf} file of the Wazuh server. An example configuration is as follows:
-
-\begin{minted}{xml}
-<remote>
-    <connection>syslog</connection>
-    <port>514</port>
-    <protocol>tcp</protocol>
-    <allowed-ips>192.168.2.15/24</allowed-ips>
-    <local_ip>192.168.2.10</local_ip>
-</remote>
-\end{minted}
-
-In this context:
-\begin{itemize}
-    \item \texttt{<connection>} defines the connection type.
-    \item \texttt{<port>} specifies the listening port.
-    \item \texttt{<protocol>} indicates the communication protocol.
-    \item \texttt{<allowed-ips>} designates permitted sender IP addresses.
-    \item \texttt{<local\_ip>} is the server's IP address that will listen for log messages.
-\end{itemize}
-
-For changes to take effect, the Wazuh manager requires a restart. This is typically performed via the command:
-
-\begin{minted}{bash}
-systemctl restart wazuh-manager
-\end{minted}
 
 \subsubsection{Simulation}
 We demonstrate the following two use-cases of Log Data Analysis.
@@ -168,7 +170,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
 \end{enumerate}
 
 \subsubsection{Dashboard Update}
-\paragraph{Testing Linux Log Data Analysis using \texttt{rsyslog}}
+\paragraph{Linux Log Data Analysis using \texttt{rsyslog}}
 \begin{enumerate}
     \item We add the new user \texttt{Alice}
     \begin{figure} [H]
