@@ -4,23 +4,22 @@ Threat hunting is a forward-looking security strategy that involves scrutinizing
 Wazuh bolsters security teams in their threat hunting efforts, enabling swift actions to confine the threat and prevent further harm.
 
 \subsubsection{Log Data Analysis}
-This feature is elaborated later in \ref{log-data-analysis}. But to summarize, for a robust threat hunting approach, efficient log data collection and analysis are critical. Wazuh, as a comprehensive XDR and SIEM platform, facilitates \textbf{centralized log data collection}, integrating data from varied sources like endpoints, network devices, and applications for simplified analysis and enhanced monitoring efficiency.
+This feature is elaborated later in \ref{log-data-analysis}. Efficient log data collection and analysis are critical for a robust threat-hunting approach. Wazuh facilitates \textbf{centralized log data collection}, integrating data from varied sources like endpoints, network devices, and applications for simplified analysis and enhanced monitoring efficiency.
 
-Below is a depiction of the Wazuh dashboard settings for auditing log collection from a monitored endpoint.
+Following is a depiction of the Wazuh dashboard settings for auditing log collection from a monitored endpoint.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{images/threat-hunting/log-collection-settings.png}
-    \caption{Log collection settings on the Wazuh dashboard}
+    \includegraphics[width=0.5\textwidth]{images/threat-hunting/log-collection-settings.png}
+    \caption{Log Collection Settings on the Wazuh Dashboard}
     \label{fig:log-collection-settings}
 \end{figure}
 
-Wazuh employs decoders to parse valuable data from collected log files, breaking down raw data into discernible attributes like timestamps, IP addresses, and event types. The dashboard showcases the \texttt{wazuh-alerts-*} index pattern and its fields as seen below.
-
+Wazuh employs decoders to parse valuable data from collected log files, breaking down raw data into discernible attributes like timestamps, IP addresses, and event types. Navigate to \texttt{Stack Management \textlangle~Index patterns \textlangle~wazuh-alerts-*} to see the following fields:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{images/threat-hunting/wazuh-alerts-index-pattern.png}
-    \caption{Index patterns on the Wazuh dashboard}
+    \includegraphics[height=5cm]{images/threat-hunting/wazuh-alerts-index-pattern.png}
+    \caption{Index Patterns on the Wazuh Dashboard}
     \label{fig:wazuh-alerts-index-pattern}
 \end{figure}
 
@@ -33,7 +32,7 @@ Wazuh provides a centralized solution for log storage from monitored endpoints, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/threat-hunting/discover-archives-logs.png}
-    \caption{Archived logs in the Discover section of the Wazuh dashboard}
+    \caption{Archived Logs in the Discover Section of the Wazuh Dashboard}
     \label{fig:discover-archives-logs}
 \end{figure}
 
@@ -41,12 +40,19 @@ Wazuh provides a centralized solution for log storage from monitored endpoints, 
 
 The MITRE ATT\&CK framework provides a structured model to identify and understand cyber attackers' tactics, techniques, and procedures (TTPs). Wazuh's integration with the MITRE ATT\&CK framework aids in identifying TTPs utilized by adversaries, enabling users to defend against them proactively.
 
-For instance, unusual login activities can be associated with specific techniques within the framework, helping in the implementation of countermeasures. We particularly witnessed this because we had a number of agents that had public IP intentionally exposed for SSH connection. We witnessed a flurry of attacks from different corners of the globe, specially from places like Russia, China or North Korea. The Wazuh dashboard offered key insights into these attack techniques and their occurrence within the environment.
+For instance, unusual login activities can be associated with specific techniques within the framework, helping in the implementation of countermeasures. We particularly witnessed this because we had a number of agents that had public IP intentionally exposed for SSH connection. We witnessed a flurry of attacks from different corners of the globe, specially from places like Russia, China or North Korea. Details for these attacks including IP address or location were available in the generated alerts.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/threat-hunting/auth-attack.png}
+    \caption{Authentication Attack Details from Generated Alerts}
+    \label{fig:mitre-attack}
+\end{figure}
+The Wazuh dashboard offered key insights into these attack techniques and their occurrence within the environment.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/threat-hunting/mitre-techniques.png}
-    \caption{MITRE ATT\&CK Module Shows the Common Techniques}
+    \caption{MITRE ATT\&CK Module Shows the Possible Attack Techniques}
     \label{fig:mitre-attack-techniques}
 \end{figure}
 
@@ -55,7 +61,7 @@ The module generates detailed reports and visualizations, highlighting the frequ
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/threat-hunting/mitre-dashboard.png}
-    \caption{MITRE ATT\&CK module Dashboard on Wazuh}
+    \caption{MITRE ATT\&CK Module Dashboard on Wazuh}
     \label{fig:mitre-attack-dashboard}
 \end{figure}
 
@@ -73,7 +79,7 @@ The management section on the Wazuh dashboard provides insight into both predefi
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{images/threat-hunting/rules.png}
+    \includegraphics[width=0.9\textwidth]{images/threat-hunting/rules.png}
     \caption{Rules View on the Wazuh Dashboard}
     \label{fig:wazuh-dashboard-rules}
 \end{figure}

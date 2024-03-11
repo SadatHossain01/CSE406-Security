@@ -20,7 +20,7 @@ The other is an agent database on the Wazuh server. The wazuh-db. daemon creates
 \begin{figure} [H]
     \centering
     \includegraphics[width=\textwidth]{images/fim/fim-flow.png}
-    \caption{The flow of file integrity monitoring in Wazuh}
+    \caption{Working Flow of Wazuh File Integrity Module}
     \label{fig:fim-flow}
 \end{figure}
 
@@ -93,7 +93,7 @@ cat ~/.ssh/test_key.pub | ssh -i github/cse406/wazuh/wazuh-agent-linux-1_key.pem
           \begin{figure} [H]
               \centering
               \includegraphics[width=\textwidth]{images/fim/fim-2.png}
-              \caption{Testing commands in terminal}
+              \caption{Testing Commands in Terminal}
               \label{fig:fim-2}
           \end{figure}
 
@@ -144,14 +144,14 @@ vim /etc/app.conf
           \begin{figure} [H]
               \centering
               \includegraphics[width=\textwidth]{images/fim/fim-11.png}
-              \caption{Wazuh alert for changes in \texttt{authorized\_keys} file}
+              \caption{Alert for Change in \texttt{authorized\_keys} File}
               \label{fig:fim-11}
           \end{figure}
     \item We extended the alert for detailed information.
           \begin{figure} [H]
               \centering
-              \includegraphics[width=\textwidth]{images/fim/fim-12.png}
-              \caption{Wazuh detailed alert for changes in \texttt{authorized\_keys} file}
+              \includegraphics[width=0.75\textwidth]{images/fim/fim-12.png}
+              \caption{Alert Details for Change in \texttt{authorized\_keys} File}
               \label{fig:fim-12}
           \end{figure}
 
@@ -163,15 +163,15 @@ vim /etc/app.conf
           \begin{figure} [H]
               \centering
               \includegraphics[width=\textwidth]{images/fim/fim-6.png}
-              \caption{Wazuh alert for changes in \texttt{/etc/app.conf} file}
+              \caption{Alert for Change in \texttt{/etc/app.conf} File}
               \label{fig:fim-6}
           \end{figure}
 
     \item We expanded the alert to get more information about the event. In this example, the vim text editor modified the configuration file. The logged-in user on the endpoint was ubuntu. The user modified the file using root privilege. The content added to the file is \texttt{updated image to V2}.
           \begin{figure} [H]
               \centering
-              \includegraphics[width=\textwidth]{images/fim/fim-8.png}
-              \caption{Wazuh detailed alert for changes in \texttt{/etc/app.conf} file}
+              \includegraphics[width=0.75\textwidth]{images/fim/fim-8.png}
+              \caption{Alert Details for Change in \texttt{/etc/app.conf} File}
               \label{fig:fim-8}
           \end{figure}
 

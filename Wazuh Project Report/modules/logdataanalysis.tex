@@ -13,7 +13,7 @@ The Wazuh server also receives \texttt{syslog} messages from devices that do not
 \begin{figure} [H]
 \centering
 \includegraphics[width=\textwidth]{images/log-data/log-data.png}
-\caption{The flow of log data collection and analysis in Wazuh}
+\caption{Working Flow of Wazuh Log Data Collection and Analysis}
 \label{fig:wazuhlogflow}
 \end{figure}
 
@@ -119,7 +119,7 @@ In this use case, we configure a \texttt{Ubuntu 20.04.6} endpoint to forward log
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/log-data/1.png}
-    \caption{\texttt{rsyslog} configuration}
+    \caption{\texttt{rsyslog} Configuration}
     \end{figure}
     Here \texttt{20.244.119.72} is the IP address of our Wazuh Server.
     \item We restart the \texttt{rsyslog} service to apply changes.
@@ -136,7 +136,7 @@ In this use case, we configure a \texttt{Ubuntu 20.04.6} endpoint to forward log
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.5\textwidth]{images/log-data/3.png}
-    \caption{Wazuh server configuration}
+    \caption{Wazuh Server Configuration}
     \end{figure}
     Here \texttt{74.225.241.81} is the IP address of the Ubuntu endpoint.
     
@@ -154,7 +154,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/log-data/9.png}
-    \caption{Wazuh Agent configuration}
+    \caption{Wazuh Agent Configuration}
     \end{figure}
     \item We restart Wazuh Agent for the change to apply.
 \end{enumerate}
@@ -165,7 +165,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/log-data/10.png}
-    \caption{Wazuh server configuration}
+    \caption{Wazuh Server Configuration}
     \end{figure}
     \item We restart Wazuh Manager for the configuration to take effect.
 \end{enumerate}
@@ -177,19 +177,19 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/log-data/7.png}
-    \caption{Adding new user}
+    \caption{Adding New User}
     \end{figure}
     \item We delete the user \texttt{Alice}
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/log-data/8.png}
-    \caption{Deleting the new user}
+    \caption{Deleting the New User}
     \end{figure}
     \item We navigate to the \texttt{Modules > Security events} tab in the Wazuh Dashboards to view the alerts. 
     \begin{figure} [H]
     \centering
     \includegraphics[width=\textwidth]{images/log-data/4.png}
-    \caption{Alerts for user/group creation and deletion}
+    \caption{Alerts for User/Group Creation and Deletion}
     \end{figure}
     \item We expand the alert to see more details.
     \begin{figure} [H]
@@ -200,7 +200,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \begin{figure} [H]
     \centering
     \includegraphics[width=\textwidth]{images/log-data/6.png}
-    \caption{Details of the rule used to generate this alert}
+    \caption{Details of the Rule Used to Generate the Alert}
     \end{figure}
 \end{enumerate}
 
@@ -218,6 +218,6 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \begin{figure} [H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/log-data/12.png}
-    \caption{Alert for new software installation}
+    \caption{Alert for New Software Installation}
     \end{figure}
 \end{enumerate}
