@@ -1,78 +1,344 @@
 \subsection{Security Configuration Assessment}
-File Integrity Monitoring (FIM) is a security process used to monitor the integrity of system and application files. FIM is an important security defense layer for any organization monitoring sensitive assets. It provides protection for sensitive data, application, and device files by monitoring, routinely scanning, and verifying their integrity. It helps organizations detect changes to critical files on their systems which reduces the risk of data being stolen or compromised. This process can save time and money in lost productivity, lost revenue, reputation damage, and legal and regulatory compliance penalties.
+Security Configuration Assessment (SCA) is the process of verifying that all systems conform to a set of predefined rules regarding configuration settings and approved application usage. One of the most certain ways to secure endpoints is by reducing their vulnerability surface. This process is commonly known as hardening. Configuration assessment is an effective way to identify weaknesses in your endpoints and patch them to reduce your attack surface.
 
-Wazuh has a built-in capability for file integrity monitoring. The Wazuh FIM module monitors files and directories and triggers an alert when a user or process creates, modifies, and deletes monitored files. It runs a baseline scan, storing the cryptographic checksum and other attributes of the monitored files. When a user or process changes a file, the module compares its checksum and attributes to the baseline. It triggers an alert if it finds a mismatch. The FIM module performs real-time and scheduled scans depending on the FIM configuration for agents and manager.
+The Wazuh SCA module performs scans to detect misconfigurations and exposures on monitored endpoints and recommend remediation actions. Those scans assess the configuration of the endpoints using policy files that contain rules to be tested against the actual configuration of the endpoint. SCA policies can check for the existence of files, directories, registry keys and values, running processes, and recursively test for the existence of files inside directories.
+
+For example, the SCA module could assess whether it is necessary to change password-related configuration, remove unnecessary software, disable unnecessary services, or audit the TCP/IP stack configuration.
+
+Policies for the SCA module are written in YAML. This format was chosen because it is human-readable and easy to understand. You can easily write your own SCA policies or extend existing ones to fit your needs. Furthermore, Wazuh is distributed with a set of out-of-the-box policies mostly based on the CIS benchmarks, a well-established standard for endpoint hardening.
 
 \subsubsection{How it works}
-The FIM module runs periodic scans on specific paths and monitors specific directories for changes in real time. You can set which paths to monitor in the configuration of the Wazuh agents and manager.
+Each Wazuh agent has its own local database where it stores the current state of each SCA check. The Wazuh server maintains an SCA database for all agents that are enrolled to it. Wazuh agents only send the differences detected between scans to the Wazuh server. If there has been no change, only a summary of the SCA scan is sent, thus avoiding unnecessary network traffic while keeping the SCA database on the Wazuh server up to date. The Wazuh server then uses those updates to issue alerts that are shown in the Wazuh dashboard.
 
-FIM stores the files checksums and other attributes in a local FIM database. Upon a scan, the Wazuh agent reports any changes the FIM module finds in the monitored paths to the Wazuh server. The FIM module looks for file modifications by comparing the checksums of a file to its stored checksums and attribute values. It generates an alert if it finds discrepancies.
+Integrity and alerting flow are depicted in the sequence diagram below.
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=\textwidth]{images/sca/sca-11.png}
+    \caption{Integrity and alerting flow diagram}
+    \label{fig:sca-11}
+\end{figure}
 
-The Wazuh FIM module uses two databases to collect FIM event data, such as file creation, modification, and deletion data. One is a local SQLite-based database on the monitored endpoint that stores the data in:
+\paragraph{Overview of an SCA Check}
+Checks are the core of an SCA policy, as they describe the scan to be performed in the endpoint. The checks contain fields that define what actions the agent should take to scan the endpoint, and how to evaluate the scan results. Each check definition comprises:
+
 \begin{itemize}
-    \item \texttt{C:\textbackslash Program Files (x86)\textbackslash ossec-agent\textbackslash queue\textbackslash fim\textbackslash db} on Windows.
-    \item \texttt{/var/ossec/queue/fim/db} on Linux.
-    \item \texttt{/Library/Ossec/queue/fim/db} on macOS.
+    \item Metadata information including a rationale, remediation, and a description of the check.
+    \item A logical description with the \texttt{condition} and \texttt{rules} fields.
 \end{itemize}
 
-The other is an agent database on the Wazuh server. The wazuh-db. daemon creates and manages a database for each agent on the Wazuh server. It uses the ID of the agent to identify the database. This service stores the databases at \texttt{/var/ossec/queue/db}.
+As part of the metadata, the SCA policy can contain an optional compliance field used to specify if the check is relevant to any compliance specifications. SCA checks usually indicate standards or policies that they aim to comply with. For example, we map CIS benchmark, PCI-DSS, NIST, and TSC controls to the relevant SCA checks.
 
-% \begin{figure} [H]
-%     \centering
-%     \includegraphics[width=\textwidth]{images/fim-flow.png}
-%     \caption{The flow of file integrity monitoring in Wazuh}
-%     \label{fig:fim-flow}
-% \end{figure}
+See below SCA policy ID \texttt{2651} for Debian 10 operating system as an example of a policy definition.
+\begin{minted}{yaml}
+- id: 2651
+    title: "Ensure SSH HostbasedAuthentication is disabled"
+    description: "The HostbasedAuthentication parameter specifies if authentication is allowed through trusted hosts via the user of .rhosts, or /etc/hosts.equiv, along with successful public key client host authentication. This option only applies to SSH Protocol Version 2."
+    rationale: "Even though the .rhosts files are ineffective if support is disabled in /etc/pam.conf, disabling the ability to use .rhosts files in SSH provides an additional layer of protection."
+    remediation: "Edit the /etc/ssh/sshd_config file to set the parameter as follows: HostbasedAuthentication no"
+    compliance:
+       - cis: ["5.2.9"]
+       - cis_csc: ["16.3"]
+       - pci_dss: ["4.1"]
+       - hipaa: ["164.312.a.2.IV", "164.312.e.1", "164.312.e.2.I", "164.312.e.2.II"]
+       - nist_800_53: ["SC.8"]
+       - tsc: ["CC6.7"]
+    condition: all
+    rules:
+       - 'c:sshd -T -> r:HostbasedAuthentication\s+no'
+\end{minted}
+\paragraph{Scan Results}
+SCA scan results appear as alerts with SCA scan data whenever a particular check changes its status between scans. Moreover, Wazuh agents only send those events necessary to keep the global status of the scan updated, avoiding potential events flooding.
 
-The FIM module keeps the Wazuh agent and the Wazuh server databases synchronized with each other. It always updates the file inventory in the Wazuh server with the data available to the Wazuh agent. An up-to-date Wazuh server database allows for servicing FIM-related API queries. The synchronization mechanism only updates the Wazuh server with information from the Wazuh agents such as checksums and file attributes that have changed.
+Any given check event has three possible results:
+\begin{itemize}
+    \item Passed
+    \item Failed
+    \item Not applicable
+\end{itemize}
 
-The Wazuh agent and manager have the FIM module enabled and pre-configured by default. However, we recommend that you review the configuration of your endpoints to ensure that you tailor the FIM settings, such as monitored paths, to your environment.
+This result is determined by the set of rules and the rule result aggregator of the check.
 
-\subsubsection{Configuration}
-The FIM module runs scans on Windows, Linux, and macOS operating systems. There are both global settings and settings that are specific to the operating system of the endpoint. We discuss these settings and the supported operating systems in the Basic settings section of this guide.
+Take the following SCA check from policy \texttt{cis\_debian10.yml} as an example. The example SCA check shown scans the Debian 10 endpoint to verify if you have implemented a “deny all” policy on your endpoint firewall:
+\begin{minted}{yaml}
+- id: 2603
+    title: "Ensure IPv6 default deny firewall policy"
+    description: "A default deny all policy on connections ensures that any unconfigured network usage will be rejected."
+    rationale: "With a default accept policy the firewall will accept any packet that is not configured to be denied. It is easier to white list acceptable usage than to black list unacceptable usage."
+    remediation: "Run the following commands to implement a default DROP policy: # ip6tables -P INPUT DROP # ip6tables -P OUTPUT DROP # ip6tables -P FORWARD DROP. Notes: Changing firewall settings while connected over network can result in being locked out of the system. Remediation will only affect the active system firewall, be sure to configure the default policy in your firewall management to apply on boot as well."
+    compliance:
+      - cis: ["3.5.4.2.1"]
+      - cis_csc: ["9.4"]
+      - pci_dss: ["1.2.1"]
+      - tsc: ["CC8.1"]
+    condition: all
+    rules:
+      - "c:ip6tables -L -> r:^Chain INPUT && r:policy DROP"
+      - "c:ip6tables -L -> r:^Chain FORWARD && r:policy DROP"
+      - "c:ip6tables -L -> r:^Chain OUTPUT && r:policy DROP"
+\end{minted}
 
-You must specify the directories where the FIM module must monitor the creation, modification, and deletion of files or configure the specific files you need to monitor. You can specify the file or directory to monitor on the Wazuh server and the Wazuh agent configuration files. You can also configure this capability remotely using the centralized configuration file.
+After evaluating the aforementioned check, the following event is generated:
+\begin{minted}{yaml}
+"data": {
+  "sca": {
+    "scan_id": "1433689708",
+    "check": {
+      "result": "failed",
+      "remediation": "Run the following commands to implement a default DROP\
+       policy: ip6tables -P INPUT DROP ip6tables -P OUTPUT DROP ip6tables \
+       -P FORWARD DROP. Notes: Changing firewall settings while connected \
+       over network can result in being locked out of the system. \
+       Remediation will only affect the active system firewall, be sure \
+       to configure the default policy in your firewall management to apply \
+       on boot as well.",
+      "compliance": {
+        "pci_dss": "1.2.1",
+        "tsc": "CC8.1",
+        "cis_csc": "9.4",
+        "cis": "3.5.4.2.1"
+      },
+      "description": "A default deny all policy on connections ensures that any unconfigured network usage will be rejected.",
+      "id": "2603",
+      "title": "Ensure IPv6 default deny firewall policy",
+      "rationale": "With a default accept policy the firewall will accept any packet that is not configured to be denied. It is easier to white list acceptable usage than to black list unacceptable usage.",
+      "command": [
+        "ip6tables -L"
+      ]
+    },
+    "type": "check",
+    "policy": "CIS Benchmark for Debian/Linux 10"
+  }
+}
+\end{minted}
+You can view the scan summaries on the Security configuration assessment tab on the Wazuh dashboard.
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/sca/sca-12.png}
+    \caption{Scan Summary on Security Configuration Assessment}
+    \label{fig:sca-12}
+\end{figure}
 
-You have to set the files and directories to monitor with the directories options. You can include multiple files and directories using comma-separated entries or adding entries on multiple lines. You can configure FIM directories using \texttt{*} and \texttt{?} wildcards in the same way you would use them in a shell or Command Prompt (cmd) terminal. For example, \texttt{C:\textbackslash Users\textbackslash *\textbackslash Downloads}.
+In addition, you can expand each result to display additional information.
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=\textwidth]{images/sca/sca-13.png}
+    \caption{Expanded SCA scan result}
+    \label{fig:sca-13}
+\end{figure}
 
-Any time the FIM module runs a scan, it triggers alerts if it finds modified files and depending on the changed file attributes. You can view these alerts in the Wazuh dashboard.
-
-Following, you can see how to configure the FIM module to monitor a file and directory. Replace \texttt{FILEPATH/OF/MONITORED/FILE} and \texttt{FILEPATH/OF/MONITORED/DIRECTORY} with your own filepaths.
+The above SCA scan result is Failed because the rule did not find Chain INPUT * policy DROP, Chain FORWARD * policy DROP, and Chain OUTPUT * policy DROP in the output of the command ip6tables \-L. The steps below show how we implement the remediation steps suggested by Wazuh to harden the endpoint:
 
 \begin{itemize}
-    \item Add the following settings to the Wazuh agent configuration file, replacing the directories values with your own filepaths:
-          \begin{itemize}
-              \item Linux: \texttt{/var/ossec/etc/ossec.conf}
-              \item Windows: \texttt{C:\textbackslash Program Files (x86)\textbackslash ossec-agent\textbackslash ossec.conf}
-              \item macOS: \texttt{/Library/Ossec/etc/ossec.conf}
-          \end{itemize}
-          \begin{minted}{xml}
-<syscheck>
-   <directories>FILEPATH/OF/MONITORED/FILE</directories>
-   <directories>FILEPATH/OF/MONITORED/DIRECTORY</directories>
-</syscheck>
+    \item Run the following recommended commands on the monitored endpoint to apply the firewall rules:
+          \begin{minted}{bash}
+ip6tables -P INPUT DROP
+ip6tables -P OUTPUT DROP
+ip6tables -P FORWARD DROP
+    \end{minted}
+    \item Save the firewall rules and make them persist on system reboot:
+          \begin{minted}{bash}
+ip6tables-save > /etc/ip6tables.conf
+crontab -l | { cat; echo "@reboot /usr/sbin/ip6tables-restore /etc/ip6tables.conf"; } | crontab -
+    \end{minted}
+    \item Restart the Wazuh agent to trigger a new SCA scan:
+          \begin{minted}{bash}
+systemctl restart wazuh-agent
+    \end{minted}
+\end{itemize}
+The scan result for check \texttt{2603} changes to Passed as shown in the image below:
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=\textwidth]{images/sca/sca-14.png}
+    \caption{Scan Result for check 2603}
+    \label{fig:sca-14}
+\end{figure}
+
+
+SCA scan result
+A check is marked as \texttt{Not applicable} in case an error occurs while performing the check. In such cases, instead of including the \texttt{result} field, the status and \texttt{reason} fields are included.
+
+\paragraph{Integrity Mechanism}
+Wazuh uses two integrity mechanisms to ensure integrity between agent-side and server-side SCA states. One of the integrity mechanisms ensures the integrity of the policy files and the second ensures the integrity of scan results.
+\begin{itemize}
+    \item Integrity of policy Files
+    \item Integrity of Scan results
+\end{itemize}
+
+\subsubsection{Configuration}
+Wazuh agents include the appropriate policies for their particular operating system during installation. For the full list of officially supported policy files, see the table Available SCA policies. These policies are included with the Wazuh server installation so that they can be easily enabled.
+
+For a detailed description of the various configuration parameters of SCA, please check the SCA reference.
+
+\paragraph{Enabling and Disabling Policies}
+By default, the Wazuh agent runs scans for every policy (.yaml or .yml files) present in their ruleset folder:
+
+\begin{itemize}
+    \item Linux and Unix-based agents: \texttt{/var/ossec/ruleset/sca}.
+    \item Windows agents: \texttt{C:\textbackslash Program Files (x86)\textbackslash ossec-agent\textbackslash ruleset\textbackslash sca}.
+    \item macOS agents: \texttt{/Library/Ossec/ruleset/sca}.
+\end{itemize}
+
+To enable a policy file outside the Wazuh agent installation folder, add the policy file path to the \texttt{\textlangle sca\textrangle} block in the Wazuh agent configuration file. An example is shown below:
+
+\begin{minted}{xml}
+<sca>
+    <policies>
+        <policy><FULLPATH_TO_CUSTOM_SCA_POLICY_FILE></policy>
+    </policies>
+</sca>
+\end{minted}
+
+You can also specify a relative path to the Wazuh installation directory:
+
+\begin{minted}{xml}
+<sca>
+    <policies>
+        <policy>etc/shared/<CUSTOM_SCA_POLICY_FILE></policy>
+    </policies>
+</sca>
+\end{minted}
+
+There are two ways to disable policies on the Wazuh agent. The simplest one is renaming the policy file by adding .disabled (or anything different from .yaml or .yml) after their YAML extension.
+
+The second is to disable them from the Wazuh agent ossec.conf file by adding a line such as the following to the <policy> section of the SCA module:
+
+\begin{minted}{xml}
+<sca>
+    <policies>
+        <policy enabled="no">etc/shared/<POLICY_FILE_TO_DISABLE></policy>
+    </policies>
+</sca>
+\end{minted}
+
+\paragraph{Sharing Policy Files and Configuration with the Wazuh Agents}
+As described in the centralized configuration section, the Wazuh manager can push files and configurations to connected Wazuh agents.
+
+You can enable this feature to push policy files to the Wazuh agents in defined groups. By default, every Wazuh agent belongs to the default group, which is used here as an example:
+
+On the Wazuh agent, edit the \texttt{local\_internal\_options.conf} file to allow the execution of commands in SCA policies sent from the Wazuh server:
+
+
+\begin{minted}{bash}
+echo "sca.remote_commands=1" >> /var/ossec/etc/local_internal_options.conf
+\end{minted}
+
+On the Wazuh server, place a new policy file in the \texttt{/var/ossec/etc/shared/default} folder and change its ownership. Replace \texttt{<NEW\_POLICY\_FILE>} with your policy name.
+
+\begin{minted}{bash}
+chown wazuh:wazuh /var/ossec/etc/shared/default/<NEW\_POLICY\_FILE>
+\end{minted}
+
+Add the following configuration block to the Wazuh server /var/ossec/etc/shared/default/agent.conf file to configure the new policy file in the Wazuh agent:
+
+\begin{minted}{xml}
+<agent_config>
+<!-- Shared agent configuration here -->
+    <sca>
+        <policies>
+            <policy>etc/shared/<NEW_POLICY_FILE></policy>
+        </policies>
+    </sca>
+</agent_config>
+\end{minted}
+
+All files remotely pushed from the Wazuh server are saved in the /<WAZUH\_HOME\_DIRECTORY>/etc/shared/ directory on the agent endpoints regardless of the group they belong to. We specify the relative file path of the policy in the configuration because the full file path could differ depending on the operating system of the monitored endpoint.
+
+The new \texttt{<sca>} block in the Wazuh server \texttt{/var/ossec/etc/shared/default/agent}.conf file is merged with the \texttt{<sca>} block on the Wazuh agent side, and the new configuration is added.
+
+\subsubsection{Simulation}
+We demonstrate the use case of detecting a keyword in a file.
+\paragraph{Detecting Keyword in a File}
+In this use case, we demonstrate how you can configure Wazuh SCA to detect the presence of a keyword in a file. We monitor a file \texttt{testfile.txt} for the phrase \texttt{password\_enabled: yes}. The Wazuh SCA module triggers an alert when it detects the pattern in the file.
+\subparagraph{Ubuntu endpoint}
+\begin{itemize}
+    \item We created the test file and add some text to it, including the phrase \texttt{password\_enabled: yes}.
+          \begin{minted}{bash}
+echo -e "config_file\nsecond line of configuration\npassword_enabled: yes" > /usr/share/testfile.txt
+        \end{minted}
+
+    \item We verified that the file was created and the phrase was present.
+          \begin{minted}{bash}
+cat /usr/share/testfile.txt
+        \end{minted}
+          Here is the output:
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/sca/sca-1.png}
+              \caption{Creating the test file and adding the phrase}
+              \label{fig:sca-1}
+          \end{figure}
+    \item We created a new directory to save your custom policy files:
+          \begin{minted}{bash}
+mkdir /var/ossec/etc/custom-sca-files/
+        \end{minted}
+
+    \item We created a new SCA policy file \texttt{/var/ossec/etc/custom-sca-files/keywordcheck.yml} and add the following content to it:
+        \begin{minted}{yaml}
+policy:
+  id: "keyword_check"
+  file: "keywordcheck.yml"
+  name: "SCA use case: Keyword check"
+  description: "Guidance for checking for a keyword or phrase in files on Ubuntu endpoints."
+  references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/sec-config-assessment/index.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/sec-config-assessment/creating-custom-policies.html
+
+requirements:
+  title: "Check that the desired file exists on the monitored endpoints"
+  description: "Requirements for running the SCA scans against endpoints with testfile.txt on them."
+  condition: any
+  rules:
+    - 'f:/usr/share/testfile.txt'
+
+checks:
+  - id: 10000
+    title: "Ensure password is disabled in the test configuration file"
+    description: "Password is enabled in the test configuration file."
+    rationale: "Password is considered weak for the custom test application. Threat actors can brute-force your password."
+    remediation: "Disable password by setting the value of the password_enabled option to no."
+    condition: none
+    rules:
+      - 'f:/usr/share/testfile.txt -> r:^password_enabled: yes$'
+        \end{minted}
+
+    \item Change the ownership of the file so Wazuh has permission to it:
+          \begin{minted}{bash}
+chown wazuh:wazuh /var/ossec/etc/custom-sca-files/keywordcheck.yml
         \end{minted}
 
 
-    \item Restart the Wazuh agent with administrator privilege to apply any configuration change:
-          \begin{itemize}
-              \item Linux: systemctl restart wazuh-agent
-              \item Windows: Restart-Service -Name wazuh
-              \item macOS: /Library/Ossec/bin/wazuh-control restart
-          \end{itemize}
-\end{itemize}
+    \item We enabled the policy file by adding the following lines to the \texttt{<ossec\_config>} block of the Wazuh agent configuration file at \texttt{/var/ossec/etc/ossec.conf}
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/sca/sca-3.png}
+              \caption{Enabling the policy file}
+              \label{fig:sca-3}
+          \end{figure}
 
-\subsubsection{Simulation}
-We demonstrate the following two use-cases of Log Data Analysis.
-\paragraph{Detecting Keyword in a File}
-Account manipulation refers to the creation, modification, or deletion of user accounts or other credentials within an organization's IT infrastructure. Monitoring this activity is critical to the cybersecurity of an organization. Unauthorized account manipulations might grant an attacker access to sensitive systems and data.
+    \item Restart the Wazuh agent to apply the changes and to run the new SCA check:
+          \begin{minted}{bash}
+systemctl restart wazuh-agent
+        \end{minted}
 
-To maintain persistence on a victim endpoint, adversaries can alter the SSH \texttt{authorized\_keys} file to add their public key. This allows them to access the system remotely without needing to authenticate with a password. We simulate this activity by adding a new public key to the \texttt{authorized\_keys} file.
+    \item All the steps in terminal.
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/sca/sca-4.png}
+              \caption{All the steps in terminal}
+              \label{fig:sca-4}
+          \end{figure}
 
-\subparagraph{Ubuntu endpoint}
-\begin{itemize}
-    \item
 \end{itemize}
 
 \subsubsection{Dashboard Update}
 \paragraph{Detecting Keyword in a File}
+On our Wazuh dashboard, we navigated to the SCA tab and selected the Ubuntu endpoint to view the results of the custom SCA check we have created.
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=\textwidth]{images/sca/sca-5.png}
+    \caption{Dashboard update for the custom SCA check}
+    \label{fig:sca-5}
+\end{figure}
+
+

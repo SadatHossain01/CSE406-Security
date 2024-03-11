@@ -19,7 +19,7 @@ The other is an agent database on the Wazuh server. The wazuh-db. daemon creates
 
 \begin{figure} [H]
     \centering
-    % \includegraphics[width=\textwidth]{images/fim-flow.png}
+    \includegraphics[width=\textwidth]{images/fim/fim-flow.png}
     \caption{The flow of file integrity monitoring in Wazuh}
     \label{fig:fim-flow}
 \end{figure}
@@ -63,7 +63,7 @@ Following, you can see how to configure the FIM module to monitor a file and dir
 \end{itemize}
 
 \subsubsection{Simulation}
-We demonstrate the following two use-cases of Log Data Analysis.
+We demonstrate the following two use-cases of file integrity module.
 \paragraph{Detecting Account Manipulation}
 Account manipulation refers to the creation, modification, or deletion of user accounts or other credentials within an organization's IT infrastructure. Monitoring this activity is critical to the cybersecurity of an organization. Unauthorized account manipulations might grant an attacker access to sensitive systems and data.
 
@@ -71,14 +71,108 @@ To maintain persistence on a victim endpoint, adversaries can alter the SSH \tex
 
 \subparagraph{Ubuntu endpoint}
 \begin{itemize}
-    \item
+    \item We edited the \texttt{/var/ossec/etc/ossec.conf} configuration file and add \texttt{authorized\_keys} for monitoring:
+    \begin{minted}{xml}
+<syscheck>
+    <directories whodata="yes" realtime="yes">/home/*/.ssh/authorized_keys</directories>
+</syscheck>
+    \end{minted}
+
+    \item  We restarted the Wazuh agent to apply the configuration:
+          \begin{minted}{bash}
+systemctl restart wazuh-agent
+            \end{minted}
+    \item We generated an SSH key\-pair for user authentication and saved it as \texttt{.ssh/test\_key} using the following command:
+          \begin{minted}{bash}
+ssh-keygen -f .ssh/test_key
+            \end{minted}
+    \item We ran the following command to copy the content of the generated SSH public key \texttt{test\_key.pub} and added it to the \texttt{authorized\_keys} file in the target Ubuntu user \texttt{.ssh} directory.
+          \begin{minted}{bash}
+cat ~/.ssh/test_key.pub | ssh -i github/cse406/wazuh/wazuh-agent-linux-1_key.pem asifazad@20.205.141.120 "sudo tee -a /home/asifazad/.ssh/authorized_keys"
+            \end{minted}
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/fim/fim-2.png}
+              \caption{Testing commands in terminal}
+              \label{fig:fim-2}
+          \end{figure}
+
 \end{itemize}
 
 
 \paragraph{Monitoring Configuration Changes}
-\subparagraph{Ubuntu endpoint}
+Monitoring configuration changes helps to establish accountability for changes made to systems and applications. Organizations can identify responsible parties and ensure that changes are properly authorized and documented by maintaining a record of changes and who made them.
 
+We can configure the FIM module to monitor configuration files and report any changes. The Wazuh FIM module uses the \texttt{whodata} and \texttt{report\_changes} attributes to record the following information about such changes:
+
+\begin{itemize}
+    \item The login user that made the changes.
+    \item The time of the changes.
+    \item The process that the user executed.
+    \item The changes made to the file.
+\end{itemize}
+
+
+\subparagraph{Ubuntu endpoint}
+\begin{itemize}
+    \item We created a file \texttt{app.conf} in the \texttt{/etc} directory.
+    \begin{minted}{bash}
+touch /etc/app.conf
+    \end{minted}
+    \item We edited the \texttt{/var/ossec/etc/ossec.conf} configuration file and add the configuration below:
+    \begin{minted}{xml}
+<syscheck>
+    <directories realtime="yes" check_all="yes" report_changes="yes" whodata="yes">/etc/app.conf</directories>
+</syscheck>
+    \end{minted}
+
+    \item We restarted the Wazuh agent to apply the configuration changes:
+          \begin{minted}{bash}
+systemctl wazuh-agent restart
+    \end{minted}
+    \item We modified the \texttt{/etc/app.conf} file by using vim with root privilege:
+          \begin{minted}{bash}
+vim /etc/app.conf
+    \end{minted}
+    \item We added \texttt{updated image to V2} to the file and save.
+\end{itemize}
 
 \subsubsection{Dashboard Update}
 \paragraph{Detecting Account Manipulation}
+\begin{itemize}
+    \item We navigated to \texttt{Modules > Integrity monitoring} on the Wazuh dashboard to view the alert generated when the FIM module detects changes to the \texttt{authorized\_keys} file.
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/fim/fim-11.png}
+              \caption{Wazuh alert for changes in \texttt{authorized\_keys} file}
+              \label{fig:fim-11}
+          \end{figure}
+    \item We extended the alert for detailed information.
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/fim/fim-12.png}
+              \caption{Wazuh detailed alert for changes in \texttt{authorized\_keys} file}
+              \label{fig:fim-12}
+          \end{figure}
+
+\end{itemize}
+
 \paragraph{Monitoring Configuration Changes}
+\begin{itemize}
+    \item We navigated to \texttt{Modules > Integrity} monitoring on the Wazuh dashboard to view the alert generated when the FIM module detects modification of the configuration file.
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/fim/fim-6.png}
+              \caption{Wazuh alert for changes in \texttt{/etc/app.conf} file}
+              \label{fig:fim-6}
+          \end{figure}
+
+    \item We expanded the alert to get more information about the event. In this example, the vim text editor modified the configuration file. The logged-in user on the endpoint was ubuntu. The user modified the file using root privilege. The content added to the file is \texttt{updated image to V2}.
+          \begin{figure} [H]
+              \centering
+              \includegraphics[width=\textwidth]{images/fim/fim-8.png}
+              \caption{Wazuh detailed alert for changes in \texttt{/etc/app.conf} file}
+              \label{fig:fim-8}
+          \end{figure}
+
+\end{itemize}
