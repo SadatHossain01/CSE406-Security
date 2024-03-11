@@ -1,0 +1,78 @@
+\subsection{Security Configuration Assessment}
+File Integrity Monitoring (FIM) is a security process used to monitor the integrity of system and application files. FIM is an important security defense layer for any organization monitoring sensitive assets. It provides protection for sensitive data, application, and device files by monitoring, routinely scanning, and verifying their integrity. It helps organizations detect changes to critical files on their systems which reduces the risk of data being stolen or compromised. This process can save time and money in lost productivity, lost revenue, reputation damage, and legal and regulatory compliance penalties.
+
+Wazuh has a built-in capability for file integrity monitoring. The Wazuh FIM module monitors files and directories and triggers an alert when a user or process creates, modifies, and deletes monitored files. It runs a baseline scan, storing the cryptographic checksum and other attributes of the monitored files. When a user or process changes a file, the module compares its checksum and attributes to the baseline. It triggers an alert if it finds a mismatch. The FIM module performs real-time and scheduled scans depending on the FIM configuration for agents and manager.
+
+\subsubsection{How it works}
+The FIM module runs periodic scans on specific paths and monitors specific directories for changes in real time. You can set which paths to monitor in the configuration of the Wazuh agents and manager.
+
+FIM stores the files checksums and other attributes in a local FIM database. Upon a scan, the Wazuh agent reports any changes the FIM module finds in the monitored paths to the Wazuh server. The FIM module looks for file modifications by comparing the checksums of a file to its stored checksums and attribute values. It generates an alert if it finds discrepancies.
+
+The Wazuh FIM module uses two databases to collect FIM event data, such as file creation, modification, and deletion data. One is a local SQLite-based database on the monitored endpoint that stores the data in:
+\begin{itemize}
+    \item \texttt{C:\textbackslash Program Files (x86)\textbackslash ossec-agent\textbackslash queue\textbackslash fim\textbackslash db} on Windows.
+    \item \texttt{/var/ossec/queue/fim/db} on Linux.
+    \item \texttt{/Library/Ossec/queue/fim/db} on macOS.
+\end{itemize}
+
+The other is an agent database on the Wazuh server. The wazuh-db. daemon creates and manages a database for each agent on the Wazuh server. It uses the ID of the agent to identify the database. This service stores the databases at \texttt{/var/ossec/queue/db}.
+
+% \begin{figure} [H]
+%     \centering
+%     \includegraphics[width=\textwidth]{images/fim-flow.png}
+%     \caption{The flow of file integrity monitoring in Wazuh}
+%     \label{fig:fim-flow}
+% \end{figure}
+
+The FIM module keeps the Wazuh agent and the Wazuh server databases synchronized with each other. It always updates the file inventory in the Wazuh server with the data available to the Wazuh agent. An up-to-date Wazuh server database allows for servicing FIM-related API queries. The synchronization mechanism only updates the Wazuh server with information from the Wazuh agents such as checksums and file attributes that have changed.
+
+The Wazuh agent and manager have the FIM module enabled and pre-configured by default. However, we recommend that you review the configuration of your endpoints to ensure that you tailor the FIM settings, such as monitored paths, to your environment.
+
+\subsubsection{Configuration}
+The FIM module runs scans on Windows, Linux, and macOS operating systems. There are both global settings and settings that are specific to the operating system of the endpoint. We discuss these settings and the supported operating systems in the Basic settings section of this guide.
+
+You must specify the directories where the FIM module must monitor the creation, modification, and deletion of files or configure the specific files you need to monitor. You can specify the file or directory to monitor on the Wazuh server and the Wazuh agent configuration files. You can also configure this capability remotely using the centralized configuration file.
+
+You have to set the files and directories to monitor with the directories options. You can include multiple files and directories using comma-separated entries or adding entries on multiple lines. You can configure FIM directories using \texttt{*} and \texttt{?} wildcards in the same way you would use them in a shell or Command Prompt (cmd) terminal. For example, \texttt{C:\textbackslash Users\textbackslash *\textbackslash Downloads}.
+
+Any time the FIM module runs a scan, it triggers alerts if it finds modified files and depending on the changed file attributes. You can view these alerts in the Wazuh dashboard.
+
+Following, you can see how to configure the FIM module to monitor a file and directory. Replace \texttt{FILEPATH/OF/MONITORED/FILE} and \texttt{FILEPATH/OF/MONITORED/DIRECTORY} with your own filepaths.
+
+\begin{itemize}
+    \item Add the following settings to the Wazuh agent configuration file, replacing the directories values with your own filepaths:
+          \begin{itemize}
+              \item Linux: \texttt{/var/ossec/etc/ossec.conf}
+              \item Windows: \texttt{C:\textbackslash Program Files (x86)\textbackslash ossec-agent\textbackslash ossec.conf}
+              \item macOS: \texttt{/Library/Ossec/etc/ossec.conf}
+          \end{itemize}
+          \begin{minted}{xml}
+<syscheck>
+   <directories>FILEPATH/OF/MONITORED/FILE</directories>
+   <directories>FILEPATH/OF/MONITORED/DIRECTORY</directories>
+</syscheck>
+        \end{minted}
+
+
+    \item Restart the Wazuh agent with administrator privilege to apply any configuration change:
+          \begin{itemize}
+              \item Linux: systemctl restart wazuh-agent
+              \item Windows: Restart-Service -Name wazuh
+              \item macOS: /Library/Ossec/bin/wazuh-control restart
+          \end{itemize}
+\end{itemize}
+
+\subsubsection{Simulation}
+We demonstrate the following two use-cases of Log Data Analysis.
+\paragraph{Detecting Keyword in a File}
+Account manipulation refers to the creation, modification, or deletion of user accounts or other credentials within an organization's IT infrastructure. Monitoring this activity is critical to the cybersecurity of an organization. Unauthorized account manipulations might grant an attacker access to sensitive systems and data.
+
+To maintain persistence on a victim endpoint, adversaries can alter the SSH \texttt{authorized\_keys} file to add their public key. This allows them to access the system remotely without needing to authenticate with a password. We simulate this activity by adding a new public key to the \texttt{authorized\_keys} file.
+
+\subparagraph{Ubuntu endpoint}
+\begin{itemize}
+    \item
+\end{itemize}
+
+\subsubsection{Dashboard Update}
+\paragraph{Detecting Keyword in a File}

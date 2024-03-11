@@ -1,4 +1,5 @@
 \subsection{Log Data Analysis}
+\label{log-data-analysis}
 
 Log data collection involves gathering information from various sources like endpoints, applications, and network devices. This data is essential for monitoring system activities and identifying potential security threats. Log data analysis, on the other hand, is the process of examining this collected data to extract useful information and identify patterns or anomalies.
 
@@ -134,7 +135,7 @@ In this use case, we configure a \texttt{Ubuntu 20.04.6} endpoint to forward log
     \item We edit the \texttt{/var/ossec/etc/ossec.conf} file and add the following configuration in between the \texttt{<ossec\_config>} tags:
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.4\textwidth]{images/log-data/3.png}
+    \includegraphics[width=0.5\textwidth]{images/log-data/3.png}
     \caption{Wazuh server configuration}
     \end{figure}
     Here \texttt{74.225.241.81} is the IP address of the Ubuntu endpoint.
@@ -152,7 +153,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \item We edit the Wazuh Agent configuration file at \texttt{C:/Program Files (x86)/ossec-agent/ossec.conf} and add the following block inside the \texttt{<ossec\_config>} tag.
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.5\textwidth]{images/log-data/9.png}
+    \includegraphics[width=0.8\textwidth]{images/log-data/9.png}
     \caption{Wazuh Agent configuration}
     \end{figure}
     \item We restart Wazuh Agent for the change to apply.
@@ -187,7 +188,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \item We navigate to the \texttt{Modules > Security events} tab in the Wazuh Dashboards to view the alerts. 
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/log-data/4.png}
+    \includegraphics[width=\textwidth]{images/log-data/4.png}
     \caption{Alerts for user/group creation and deletion}
     \end{figure}
     \item We expand the alert to see more details.
@@ -198,7 +199,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \end{figure}
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/log-data/6.png}
+    \includegraphics[width=\textwidth]{images/log-data/6.png}
     \caption{Details of the rule used to generate this alert}
     \end{figure}
 \end{enumerate}
@@ -216,7 +217,7 @@ In this use case, we configure a \texttt{Windows 11} device running Wazuh Agent 
     \item We navigate to the \texttt{Modules > Security events} tab in the Wazuh Dashboards to view the alert. 
     \begin{figure} [H]
     \centering
-    \includegraphics[width=0.5\textwidth]{images/log-data/12.png}
+    \includegraphics[width=0.4\textwidth]{images/log-data/12.png}
     \caption{Alert for new software installation}
     \end{figure}
 \end{enumerate}

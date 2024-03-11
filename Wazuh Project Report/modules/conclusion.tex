@@ -1,3 +1,4 @@
+\newpage
 \section{Issues Faced}
 \subsection{Server Crash: macOS Not Supporting Realtime Monitoring}
 \begin{itemize}
@@ -16,7 +17,11 @@
 \end{itemize}
 
 \subsection{Source Code Compilation Challenges}
-
+\begin{itemize}
+    \item Documentation and detailed instructions are pretty scant. 
+    \item The exact release tag of the repository needs to be checked out for the source code to compile. The master branch doesn't always compile with the officially provided scripts.
+    \item The OpenSearch, OpenSearch Dashboard and Wazuh versions need to be compatible in order for \texttt{dev.sh} script to work. However, compatible versions aren't documented anywhere.
+\end{itemize}
 \section{Reference}
 \begin{itemize}
     \item \href{https://documentation.wazuh.com}{The Official Wazuh Documentation}
